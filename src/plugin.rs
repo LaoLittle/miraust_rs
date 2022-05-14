@@ -2,8 +2,8 @@ use std::marker::PhantomPinned;
 use libloading::Library;
 
 pub struct RustPlugin {
-    pub(crate) lib: Library,
-    pub(crate) func: RustPluginFunc,
+    lib: Library,
+    func: RustPluginFunc,
     _mark: PhantomPinned,
 }
 
