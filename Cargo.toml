@@ -12,7 +12,16 @@ lazy_static = "1"
 
 [lib]
 #path = "src/lib.rs"
-crate-type = ["lib", "staticlib", "cdylib"]
+crate-type = ["lib", "cdylib"]
+
+[profile.release]
+panic = "abort"
+lto = true
+debug = false
+opt-level = 3
+incremental = false
+strip = true
+codegen-units = 1
 
 [workspace]
 members = [

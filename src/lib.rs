@@ -1,6 +1,8 @@
+#![feature(once_cell)]
+
 use std::ffi::c_void;
 
-use jni::{JavaVM, JNIEnv, sys::{jint, jobject, jstring}};
+use jni::{JavaVM, sys::{jint, jobject, jstring}};
 
 use crate::jni_loader::jni_onload;
 use crate::plugin::RustPlugin;
@@ -11,10 +13,9 @@ pub mod plugin;
 mod plugin_loader;
 mod plugin_manager;
 mod jni_loader;
-
-fn broadcast(env: JNIEnv, obj: jobject, content: jstring) {
-    todo!()
-}
+pub mod bot;
+mod jni_callback;
+pub mod contact;
 
 #[no_mangle]
 #[allow(non_snake_case)]

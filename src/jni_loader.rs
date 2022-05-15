@@ -1,13 +1,13 @@
 use std::ffi::c_void;
 use std::sync::Mutex;
 
-use jni::{JavaVM, JNIEnv, NativeMethod};
-use jni::objects::{GlobalRef};
+use jni::{AttachGuard, JavaVM, JNIEnv, NativeMethod};
+use jni::objects::GlobalRef;
 use jni::sys::{jint, JNI_ERR};
 use lazy_static::lazy_static;
 
+use crate::jni_callback::{MIRAI_ENV, MiraiEnv};
 use crate::plugin_loader::*;
-
 
 macro_rules! jni_method {
     ( $name:expr, $signature:expr, $fun:tt ) => {{
@@ -52,8 +52,7 @@ pub(crate) fn jni_onload(jvm: JavaVM, _reserved: *mut c_void) -> jint {
     status = register_natives(&jvm, class_name, &jni_methods);
     if status == JNI_ERR { return JNI_ERR; }
 
-    let mut ptr_jvm = JVM_GLOBAL.lock().unwrap();
-    *ptr_jvm = Some(jvm);
+    set_callback(jvm);
 
     status
 }
@@ -79,6 +78,22 @@ fn register_natives(jvm: &JavaVM, class_name: &str, methods: &[NativeMethod]) ->
     }
 }
 
+fn set_callback(jvm: JavaVM) {
+    let jvm = Box::new(jvm);
+    let jvm: &'static JavaVM = Box::leak(jvm);
+    let env: AttachGuard = jvm.attach_current_thread().unwrap();
+
+    let bot_get_instance = env.get_static_method_id("net/mamoe/mirai/Bot", "getInstanceOrNull", "(J)Lnet/mamoe/mirai/Bot;").unwrap();
+    let bot_get_friend = env.get_method_id("net/mamoe/mirai/Bot", "getFriend", "(J)Lnet/mamoe/mirai/contact/Friend;").unwrap();
+    if let Err(mirai) = MIRAI_ENV.set(MiraiEnv {
+        jvm,
+        env,
+        bot_get_instance,
+        bot_get_friend,
+    }) {
+        mirai.env.throw_new("java/lang/RuntimeException", "").unwrap();
+    };
+}
 
 /* fn jni_method<F: Fn()>(name: &str, signature: &str, fun: F) -> NativeMethod {
     NativeMethod {
