@@ -25,7 +25,7 @@ impl<'a> Bot {
     pub fn get_instance(id: i64) -> Option<Bot> {
         let (send, recv) = mpsc::channel();
         CALLBACK_POOL.get().unwrap().execute(move |env| {
-            send.send(unsafe { Bot::get_instance_uncheck(env, id) }).unwrap();
+            send.send(unsafe { Bot::get_instance_unchecked(env, id) }).unwrap();
         }).ok()?;
 
         let r = recv.recv().unwrap();
@@ -45,7 +45,7 @@ impl<'a> Bot {
         r.map(|global_ref| Friend { id, inner: global_ref })
     }
 
-    pub unsafe fn get_instance_uncheck(env: &'a JNIEnv, id: i64) -> Option<GlobalRef> {
+    pub unsafe fn get_instance_unchecked(env: &'a JNIEnv, id: i64) -> Option<GlobalRef> {
         let mirai = MIRAI_ENV.get()?;
 
         if let Ok(bot) = env.call_static_method_unchecked(
