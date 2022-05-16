@@ -78,10 +78,12 @@ impl Pool {
             }
 
             while let Ok(job) = r.recv() {
-                let mut status = status.lock().unwrap();
-                *status = Status::Running;
+                let mut s = status.lock().unwrap();
+                *s = Status::Running;
+                drop(s);
                 job(&env);
-                *status = Status::Waiting;
+                let mut s = status.lock().unwrap();
+                *s = Status::Waiting;
             }
 
             let mut status = status.lock().unwrap();

@@ -1,4 +1,4 @@
-use jni::objects::{GlobalRef};
+use jni::objects::GlobalRef;
 
 pub struct Friend {
     pub(crate) id: i64,

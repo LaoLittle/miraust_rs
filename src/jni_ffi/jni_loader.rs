@@ -46,7 +46,7 @@ fn JNI_OnLoad(jvm: JavaVM, _reserved: *mut c_void) -> jint {
     if status == JNI_ERR { return JNI_ERR; }
 
     set_callback(jvm);
-    if let Err(_) = CALLBACK_POOL.set(Pool::new(16)) {
+    if CALLBACK_POOL.set(Pool::new(16)).is_err() {
         status = JNI_ERR;
     };
 
@@ -65,7 +65,7 @@ fn register_natives(jvm: &JavaVM, class_name: &str, methods: &[NativeMethod]) ->
             return JNI_ERR;
         }
     };
-    let result = env.register_native_methods(clazz, &methods);
+    let result = env.register_native_methods(clazz, methods);
 
     if result.is_ok() {
         version
@@ -81,11 +81,11 @@ fn set_callback(jvm: JavaVM) {
 
     let bot_get_instance = env.get_static_method_id("net/mamoe/mirai/Bot", "getInstanceOrNull", "(J)Lnet/mamoe/mirai/Bot;").unwrap();
     let bot_get_friend = env.get_method_id("net/mamoe/mirai/Bot", "getFriend", "(J)Lnet/mamoe/mirai/contact/Friend;").unwrap();
-    if let Err(_) = MIRAI_ENV.set(MiraiEnv {
+    if MIRAI_ENV.set(MiraiEnv {
         jvm,
         bot_get_instance,
         bot_get_friend,
-    }) {
+    }).is_err() {
         env.throw_new("java/lang/RuntimeException", "").unwrap();
     };
 }

@@ -4,9 +4,8 @@ use std::sync::mpsc;
 use jni::JNIEnv;
 use jni::objects::{GlobalRef, JValue};
 use jni::signature::JavaType;
+
 use crate::contact::friend::Friend;
-
-
 use crate::jni_ffi::jni_callback::{CALLBACK_POOL, MIRAI_ENV};
 
 pub struct Bot {
@@ -31,23 +30,19 @@ impl<'a> Bot {
 
         let r = recv.recv().unwrap();
 
-        if let Some(global) = r {
-            Some(Bot { id, inner: global })
-        } else { None }
+        r.map(|global_ref| Bot { id, inner: global_ref })
     }
 
     pub fn get_friend(&self, id: i64) -> Option<Friend> {
         let global_ref = self.inner.clone();
         let (send, recv) = mpsc::channel();
         CALLBACK_POOL.get().unwrap().execute(move |env| {
-            send.send(unsafe { Bot::get_friend_unchecked(global_ref ,env, id) }).unwrap();
+            send.send(unsafe { Bot::get_friend_unchecked(global_ref, env, id) }).unwrap();
         }).ok()?;
 
         let r = recv.recv().unwrap();
 
-        if let Some(global) = r {
-            Some(Friend { id, inner: global })
-        } else { None }
+        r.map(|global_ref| Friend { id, inner: global_ref })
     }
 
     pub unsafe fn get_instance_uncheck(env: &'a JNIEnv, id: i64) -> Option<GlobalRef> {

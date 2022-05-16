@@ -2,7 +2,7 @@ use std::path::Path;
 use std::ptr::null;
 
 use jni::JNIEnv;
-use jni::sys::{jobject, jobjectArray, jstring};
+use jni::sys::{jobject, jobjectArray, jsize, jstring};
 use libloading::Library;
 
 use crate::plugin::RustPluginFunc;
@@ -56,10 +56,8 @@ pub(crate) fn get_plugin_description(env: JNIEnv, _obj: jobject, plugin: *const 
     let version = desc.version.as_str();
 
     {
-        let mut i = 0;
-        for s in [id, name, author, version] {
-            env.set_object_array_element(string_array, i, env.new_string(s).unwrap()).unwrap();
-            i += 1;
+        for (i, s) in [id, name, author, version].into_iter().enumerate() {
+            env.set_object_array_element(string_array, i as jsize, env.new_string(s).unwrap()).unwrap();
         };
     }
 
