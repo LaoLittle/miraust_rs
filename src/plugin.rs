@@ -1,4 +1,5 @@
 use std::marker::PhantomPinned;
+
 use libloading::Library;
 
 pub struct RustPlugin {
@@ -33,7 +34,7 @@ impl RustPlugin {
         RustPlugin {
             lib,
             func,
-            _mark: PhantomPinned
+            _mark: PhantomPinned,
         }
     }
 

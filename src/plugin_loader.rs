@@ -2,11 +2,11 @@ use std::path::Path;
 use std::ptr::null;
 
 use jni::JNIEnv;
-use jni::sys::jobjectArray;
+use jni::sys::{jobject, jobjectArray, jstring};
 use libloading::Library;
 
-use crate::{jobject, jstring, RustPlugin};
 use crate::plugin::RustPluginFunc;
+use crate::RustPlugin;
 
 pub(crate) fn load_plugin(env: JNIEnv, _obj: jobject, str: jstring) -> *const RustPlugin {
     let str = env.get_string(str.into()).unwrap();

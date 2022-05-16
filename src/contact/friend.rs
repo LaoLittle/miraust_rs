@@ -1,10 +1,15 @@
-use jni::objects::JObject;
+use jni::objects::{GlobalRef};
 
-pub struct Friend<'a> {
-    pub(crate) inner: JObject<'a>,
+pub struct Friend {
+    pub(crate) id: i64,
+    pub(crate) inner: GlobalRef,
 }
 
-impl<'a> Friend<'a> {
+impl Friend {
+    pub fn id(&self) -> u64 {
+        self.id as u64
+    }
+
     pub fn a(&self) {
         let _ = self.inner;
     }

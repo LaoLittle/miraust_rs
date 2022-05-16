@@ -1,8 +1,9 @@
-use std::thread;
+use miraust::bot::bot::Bot;
 use miraust::plugin::{RustPluginDescription, RustPluginFunc, ToMirai};
 
 #[no_mangle]
 fn on_load() -> RustPluginFunc {
+
     A.register()
 }
 
@@ -20,6 +21,7 @@ impl ToMirai for A{
     }
 
     fn on_enable() {
+        //let bot = Bot::get_instance_uncheck(1323);
         println!("enabled!");
     }
 }

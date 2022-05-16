@@ -1,12 +1,10 @@
 use std::ffi::c_void;
-use std::sync::Mutex;
 
-use jni::{AttachGuard, JavaVM, JNIEnv, NativeMethod};
-use jni::objects::GlobalRef;
+use jni::{JavaVM, JNIEnv, NativeMethod};
 use jni::sys::{jint, JNI_ERR};
-use lazy_static::lazy_static;
 
-use crate::jni_callback::{MIRAI_ENV, MiraiEnv};
+use crate::jni_ffi::jni_callback::{CALLBACK_POOL, MIRAI_ENV, MiraiEnv};
+use crate::jni_ffi::thread_pool::Pool;
 use crate::plugin_loader::*;
 
 macro_rules! jni_method {
@@ -19,15 +17,10 @@ macro_rules! jni_method {
     }};
 }
 
-lazy_static! {
-    // jvm
-    static ref JVM_GLOBAL: Mutex<Option<JavaVM>> = Mutex::new(None);
-    //callback
-    static ref JNI_CALLBACK: Mutex<Option<GlobalRef>> = Mutex::new(None);
-}
-
 // jni_onload 实现
-pub(crate) fn jni_onload(jvm: JavaVM, _reserved: *mut c_void) -> jint {
+#[no_mangle]
+#[allow(non_snake_case)]
+fn JNI_OnLoad(jvm: JavaVM, _reserved: *mut c_void) -> jint {
     let mut status: jint;
     // register to class RustPluginLoader
     let plugin_loader = "org/laolittle/loader/RustPluginLoader";
@@ -53,6 +46,9 @@ pub(crate) fn jni_onload(jvm: JavaVM, _reserved: *mut c_void) -> jint {
     if status == JNI_ERR { return JNI_ERR; }
 
     set_callback(jvm);
+    if let Err(_) = CALLBACK_POOL.set(Pool::new(16)) {
+        status = JNI_ERR;
+    };
 
     status
 }
@@ -81,17 +77,16 @@ fn register_natives(jvm: &JavaVM, class_name: &str, methods: &[NativeMethod]) ->
 fn set_callback(jvm: JavaVM) {
     let jvm = Box::new(jvm);
     let jvm: &'static JavaVM = Box::leak(jvm);
-    let env: AttachGuard = jvm.attach_current_thread().unwrap();
+    let env = jvm.get_env().unwrap();
 
     let bot_get_instance = env.get_static_method_id("net/mamoe/mirai/Bot", "getInstanceOrNull", "(J)Lnet/mamoe/mirai/Bot;").unwrap();
     let bot_get_friend = env.get_method_id("net/mamoe/mirai/Bot", "getFriend", "(J)Lnet/mamoe/mirai/contact/Friend;").unwrap();
-    if let Err(mirai) = MIRAI_ENV.set(MiraiEnv {
+    if let Err(_) = MIRAI_ENV.set(MiraiEnv {
         jvm,
-        env,
         bot_get_instance,
         bot_get_friend,
     }) {
-        mirai.env.throw_new("java/lang/RuntimeException", "").unwrap();
+        env.throw_new("java/lang/RuntimeException", "").unwrap();
     };
 }
 
