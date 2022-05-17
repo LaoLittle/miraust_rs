@@ -79,7 +79,7 @@ fn set_callback(jvm: JavaVM) {
     let jvm: &'static JavaVM = Box::leak(jvm);
     let env = jvm.get_env().unwrap();
 
-    let bot_get_instance = env.get_static_method_id("net/mamoe/mirai/Bot", "getInstanceOrNull", "(J)Lnet/mamoe/mirai/Bot;").unwrap();
+    let bot_get_instance = env.get_static_method_id("net/mamoe/mirai/Bot", "findInstance", "(J)Lnet/mamoe/mirai/Bot;").unwrap();
     let bot_get_friend = env.get_method_id("net/mamoe/mirai/Bot", "getFriend", "(J)Lnet/mamoe/mirai/contact/Friend;").unwrap();
     if MIRAI_ENV.set(MiraiEnv {
         jvm,
