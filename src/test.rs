@@ -1,6 +1,8 @@
 #[cfg(test)]
 mod tests {
+    use std::sync::mpsc;
     use std::thread;
+    use std::thread::JoinHandle;
 
     #[test]
     fn lib_load() {
@@ -63,5 +65,16 @@ mod tests {
             }
             println!("Exit!");
         });
+    }
+
+    #[test]
+    fn shit() {
+        let (s, r) = mpsc::channel::<JoinHandle<()>>();
+        let handle = thread::spawn(move || {
+            let handle = r.recv().unwrap();
+            handle.join();
+        });
+
+        s.send(handle);
     }
 }
