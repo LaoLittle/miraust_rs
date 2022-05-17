@@ -14,8 +14,8 @@ pub struct Bot {
 }
 
 impl<'a> Bot {
-    pub fn id(&self) -> u64 {
-        self.id as u64
+    pub fn id(&self) -> i64 {
+        self.id
     }
 
     pub fn instances() {
@@ -28,7 +28,7 @@ impl<'a> Bot {
             send.send(unsafe { Bot::get_instance_unchecked(env, id) }).unwrap();
         }).ok()?;
 
-        let r = recv.recv().unwrap();
+        let r = recv.recv().ok()?;
 
         r.map(|global_ref| Bot { id, inner: global_ref })
     }
@@ -40,11 +40,13 @@ impl<'a> Bot {
             send.send(unsafe { Bot::get_friend_unchecked(global_ref, env, id) }).unwrap();
         }).ok()?;
 
-        let r = recv.recv().unwrap();
+        let r = recv.recv().ok()?;
 
         r.map(|global_ref| Friend { id, inner: global_ref })
     }
 
+    /// # Safety
+    /// This function will not attach thread to jvm
     pub unsafe fn get_instance_unchecked(env: &'a JNIEnv, id: i64) -> Option<GlobalRef> {
         let mirai = MIRAI_ENV.get()?;
 
@@ -54,12 +56,14 @@ impl<'a> Bot {
             JavaType::Object("net/mamoe/mirai/Bot".to_string()),
             &[JValue::Long(id)],
         ) {
-            Some(env.new_global_ref(bot.l().unwrap()).ok()?)
+            Some(env.new_global_ref(bot.l().ok()?).ok()?)
         } else {
             None
         }
     }
 
+    /// # Safety
+    /// This function will not attach thread to jvm
     pub unsafe fn get_friend_unchecked(global_ref: GlobalRef, env: &'a JNIEnv, id: i64) -> Option<GlobalRef> {
         let mirai = MIRAI_ENV.get()?;
 
@@ -69,7 +73,7 @@ impl<'a> Bot {
             JavaType::Object("net/mamoe/mirai/contact/Friend".to_string()),
             &[JValue::Long(id)],
         ) {
-            Some(env.new_global_ref(friend.l().unwrap()).ok()?)
+            Some(env.new_global_ref(friend.l().ok()?).ok()?)
         } else {
             None
         }
