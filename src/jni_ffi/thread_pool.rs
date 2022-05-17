@@ -35,24 +35,27 @@ impl Pool {
     {
         let arc = self.threads.clone();
 
-        let threads = arc.lock().unwrap();
+        {
+            let threads = arc.lock().unwrap();
 
-        for worker in threads.iter() {
-            match worker.status() {
-                Status::Waiting => {
-                    self.sender.send(Box::new(fun))?;
-                    return Ok(());
+            for worker in threads.iter() {
+                match worker.status() {
+                    Status::Waiting => {
+                        self.sender.send(Box::new(fun))?;
+                        return Ok(());
+                    }
+                    _ => {}
                 }
-                _ => {}
+            }
+
+            if threads.len() >= self.max_thread as usize {
+                self.sender.send(Box::new(fun))?;
+                return Ok(());
             }
         }
 
-        if threads.len() >= self.max_thread as usize {
-            self.sender.send(Box::new(fun))?;
-            return Ok(());
-        }
-
         self.new_worker(Some(Box::new(fun)));
+
         Ok(())
     }
 
@@ -60,6 +63,7 @@ impl Pool {
         let builder = thread::Builder::new();
 
         let arc = self.threads.clone();
+
         let mut threads = arc.lock().unwrap();
 
         let r = self.receiver.clone();
@@ -71,23 +75,24 @@ impl Pool {
             let mirai = MIRAI_ENV.get().unwrap();
             let env = mirai.jvm.attach_current_thread_as_daemon().unwrap();
 
-            let status = _s;
-
             if let Some(job_first) = job {
                 job_first(&env);
             }
 
+            let set_status = |status: Status| {
+                let mut s = _s.lock().unwrap();
+                s.set(status)
+            };
+
             while let Ok(job) = r.recv() {
-                let mut s = status.lock().unwrap();
-                *s = Status::Running;
-                drop(s);
+                set_status(Status::Running);
+
                 job(&env);
-                let mut s = status.lock().unwrap();
-                *s = Status::Waiting;
+
+                set_status(Status::Waiting);
             }
 
-            let mut status = status.lock().unwrap();
-            *status = Status::Stopped;
+            set_status(Status::Stopped);
         }).expect("Unable to create thread");
 
         threads.push(Worker {
@@ -99,7 +104,8 @@ impl Pool {
 
 impl Worker {
     fn status(&self) -> Status {
-        self.status.clone().lock().unwrap().clone()
+        let st = self.status.try_lock();
+        if let Ok(guard) = st { guard.clone() } else { Status::Running }
     }
 }
 
@@ -110,4 +116,10 @@ pub(crate) enum Status {
     Waiting,
     Running,
     Stopped,
+}
+
+impl Status {
+    fn set(&mut self, status: Status) {
+        *self = status
+    }
 }
