@@ -56,6 +56,10 @@ impl<'a> Bot {
             JavaType::Object("net/mamoe/mirai/Bot".to_string()),
             &[JValue::Long(id)],
         ) {
+            // JValue is a one-value struct
+            let ptr = &bot as *const _ as *const usize;
+            if *ptr == 0 { return None }
+
             Some(env.new_global_ref(bot.l().ok()?).ok()?)
         } else {
             None
@@ -73,6 +77,9 @@ impl<'a> Bot {
             JavaType::Object("net/mamoe/mirai/contact/Friend".to_string()),
             &[JValue::Long(id)],
         ) {
+            let ptr = &friend as *const _ as *const usize;
+            if *ptr == 0 { return None }
+
             Some(env.new_global_ref(friend.l().ok()?).ok()?)
         } else {
             None
