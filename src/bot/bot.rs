@@ -1,8 +1,10 @@
 use std::fmt::{Display, Formatter};
+use std::mem;
+
 use std::sync::mpsc;
 
 use jni::JNIEnv;
-use jni::objects::{GlobalRef, JValue};
+use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::JavaType;
 
 use crate::contact::friend::Friend;
@@ -50,17 +52,16 @@ impl<'a> Bot {
     pub unsafe fn get_instance_unchecked(env: &'a JNIEnv, id: i64) -> Option<GlobalRef> {
         let mirai = MIRAI_ENV.get()?;
 
-        if let Ok(bot) = env.call_static_method_unchecked(
+        if let Ok(value) = env.call_static_method_unchecked(
             "net/mamoe/mirai/Bot",
             mirai.bot_get_instance,
             JavaType::Object("net/mamoe/mirai/Bot".to_string()),
             &[JValue::Long(id)],
         ) {
-            // JValue is a one-value struct
-            let ptr = &bot as *const _ as *const usize;
-            if *ptr == 0 { return None }
+            let obj = value.l().ok()?;
+            if obj.is_null() { return None }
 
-            Some(env.new_global_ref(bot.l().ok()?).ok()?)
+            Some(env.new_global_ref(obj).ok()?)
         } else {
             None
         }
@@ -71,19 +72,29 @@ impl<'a> Bot {
     pub unsafe fn get_friend_unchecked(global_ref: GlobalRef, env: &'a JNIEnv, id: i64) -> Option<GlobalRef> {
         let mirai = MIRAI_ENV.get()?;
 
-        if let Ok(friend) = env.call_method_unchecked(
+        if let Ok(value) = env.call_method_unchecked(
             global_ref.as_obj(),
             mirai.bot_get_friend,
             JavaType::Object("net/mamoe/mirai/contact/Friend".to_string()),
             &[JValue::Long(id)],
         ) {
-            let ptr = &friend as *const _ as *const usize;
-            if *ptr == 0 { return None }
+            let obj = value.l().ok()?;
+            if obj.is_null() { return None }
 
-            Some(env.new_global_ref(friend.l().ok()?).ok()?)
+            Some(env.new_global_ref(obj).ok()?)
         } else {
             None
         }
+    }
+}
+
+trait CanBeNull {
+    fn is_null(&self) -> bool;
+}
+
+impl<'a> CanBeNull for JObject<'a> {
+    fn is_null(&self) -> bool {
+        unsafe { *mem::transmute::<&JObject, &usize>(self) == 0 }
     }
 }
 
