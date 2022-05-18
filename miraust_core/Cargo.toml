@@ -1,15 +1,19 @@
 [package]
-name = "jni_test"
+name = "miraust_core"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-miraust = { path = "../.." }
+jni = "0"
+libloading = "0"
+crossbeam = "0"
+#lazy_static = "1"
 
 [lib]
-crate-type = ["cdylib"]
+#path = "src/lib.rs"
+crate-type = ["lib", "cdylib"]
 
 [profile.release]
 panic = "abort"

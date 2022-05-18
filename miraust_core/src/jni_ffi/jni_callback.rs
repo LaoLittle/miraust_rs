@@ -13,6 +13,8 @@ pub(crate) struct MiraiEnv {
     pub(crate) jvm: &'static JavaVM,
     pub(crate) bot_get_instance: JStaticMethodID<'static>,
     pub(crate) bot_get_friend: JMethodID<'static>,
+    pub(crate) bot_get_group: JMethodID<'static>,
+    pub(crate) bot_get_stranger: JMethodID<'static>
 }
 
 impl MiraiEnv {}

@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "jni_test"
+name = "plugin_example"
 version = "0.1.0"

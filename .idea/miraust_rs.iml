@@ -4,8 +4,12 @@
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/example/jni_test/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/miraust_api/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/miraust_core/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/plugin_example/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/example/jni_test/target" />
+      <excludeFolder url="file://$MODULE_DIR$/miraust_api/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

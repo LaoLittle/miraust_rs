@@ -26,5 +26,7 @@ codegen-units = 1
 
 [workspace]
 members = [
-    "example/jni_test",
+    "miraust_api",
+    "miraust_core",
+    "plugin_example"
 ]

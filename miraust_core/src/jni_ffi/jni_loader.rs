@@ -1,6 +1,7 @@
 use std::ffi::c_void;
 
 use jni::{JavaVM, JNIEnv, NativeMethod};
+
 use jni::sys::{jint, JNI_ERR};
 
 use crate::jni_ffi::jni_callback::{CALLBACK_POOL, MIRAI_ENV, MiraiEnv};
@@ -46,9 +47,7 @@ extern "system" fn JNI_OnLoad(jvm: JavaVM, _reserved: *mut c_void) -> jint {
     if status == JNI_ERR { return JNI_ERR; }
 
     set_callback(jvm);
-    if CALLBACK_POOL.set(Pool::new(16)).is_err() {
-        status = JNI_ERR;
-    };
+    if CALLBACK_POOL.set(Pool::new(16)).is_err() { status = JNI_ERR; };
 
     status
 }
@@ -79,12 +78,19 @@ fn set_callback(jvm: JavaVM) {
     let jvm: &'static JavaVM = Box::leak(jvm);
     let env = jvm.get_env().unwrap();
 
-    let bot_get_instance = env.get_static_method_id("net/mamoe/mirai/Bot", "findInstance", "(J)Lnet/mamoe/mirai/Bot;").unwrap();
-    let bot_get_friend = env.get_method_id("net/mamoe/mirai/Bot", "getFriend", "(J)Lnet/mamoe/mirai/contact/Friend;").unwrap();
+    let bot_class = env.find_class("net/mamoe/mirai/Bot").unwrap();
+
+    let bot_get_instance = env.get_static_method_id(bot_class, "findInstance", "(J)Lnet/mamoe/mirai/Bot;").unwrap();
+    let bot_get_friend = env.get_method_id(bot_class, "getFriend", "(J)Lnet/mamoe/mirai/contact/Friend;").unwrap();
+    let bot_get_group = env.get_method_id(bot_class, "getGroup", "(J)Lnet/mamoe/mirai/contact/Group;").unwrap();
+    let bot_get_stranger = env.get_method_id(bot_class, "getStranger", "(J)Lnet/mamoe/mirai/contact/Stranger;").unwrap();
     if MIRAI_ENV.set(MiraiEnv {
         jvm,
         bot_get_instance,
         bot_get_friend,
+        bot_get_group,
+        bot_get_stranger,
+
     }).is_err() {
         env.throw_new("java/lang/RuntimeException", "").unwrap();
     };
