@@ -9,7 +9,7 @@ use libloading::Library;
 use crate::plugin::RustPluginFunc;
 use crate::RustPlugin;
 
-pub(crate) fn load_plugin(env: JNIEnv, _obj: JObject, str: JString) -> *const RustPlugin {
+pub(crate) extern fn load_plugin(env: JNIEnv, _obj: JObject, str: JString) -> *const RustPlugin {
     let str = env.get_string(str).unwrap();
     let str = str.to_str().unwrap();
     let path = Path::new(str);
@@ -32,11 +32,11 @@ pub(crate) fn load_plugin(env: JNIEnv, _obj: JObject, str: JString) -> *const Ru
     }
 }
 
-pub(crate) fn unload_plugin(_env: JNIEnv, _obj: JObject, plugin: *mut RustPlugin) {
+pub(crate) extern fn unload_plugin(_env: JNIEnv, _obj: JObject, plugin: *mut RustPlugin) {
     unsafe { Box::from_raw(plugin) };
 }
 
-pub(crate) fn get_plugin_description(env: JNIEnv, _obj: JObject, plugin: &RustPlugin) -> jobjectArray {
+pub(crate) extern fn get_plugin_description(env: JNIEnv, _obj: JObject, plugin: &RustPlugin) -> jobjectArray {
     //let plugin = unsafe { &*plugin };
 
     let string_array = env.new_object_array(
@@ -65,13 +65,13 @@ pub(crate) fn get_plugin_description(env: JNIEnv, _obj: JObject, plugin: &RustPl
     string_array
 }
 
-pub(crate) fn enable_plugin(_env: JNIEnv, _obj: JObject, plugin: &RustPlugin) {
+pub(crate) extern fn enable_plugin(_env: JNIEnv, _obj: JObject, plugin: &RustPlugin) {
     //let plugin = unsafe { &*plugin };
 
     plugin.enable();
 }
 
-pub(crate) fn disable_plugin(_env: JNIEnv, _obj: JObject, plugin: &RustPlugin) {
+pub(crate) extern fn disable_plugin(_env: JNIEnv, _obj: JObject, plugin: &RustPlugin) {
     //let plugin = unsafe { &*plugin };
 
     plugin.disable();

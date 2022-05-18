@@ -20,7 +20,7 @@ macro_rules! jni_method {
 // jni_onload 实现
 #[no_mangle]
 #[allow(non_snake_case)]
-fn JNI_OnLoad(jvm: JavaVM, _reserved: *mut c_void) -> jint {
+extern "system" fn JNI_OnLoad(jvm: JavaVM, _reserved: *mut c_void) -> jint {
     let mut status: jint;
     // register to class RustPluginLoader
     let plugin_loader = "org/laolittle/loader/RustPluginLoader";

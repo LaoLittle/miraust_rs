@@ -9,4 +9,4 @@ mod plugin_manager;
 mod jni_ffi;
 pub mod bot;
 pub mod contact;
-mod c_api;
+mod api;
