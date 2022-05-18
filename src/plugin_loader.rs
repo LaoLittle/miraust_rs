@@ -36,8 +36,8 @@ pub(crate) fn unload_plugin(_env: JNIEnv, _obj: JObject, plugin: *mut RustPlugin
     unsafe { Box::from_raw(plugin) };
 }
 
-pub(crate) fn get_plugin_description(env: JNIEnv, _obj: JObject, plugin: *const RustPlugin) -> jobjectArray {
-    let plugin = unsafe { &*plugin };
+pub(crate) fn get_plugin_description(env: JNIEnv, _obj: JObject, plugin: &RustPlugin) -> jobjectArray {
+    //let plugin = unsafe { &*plugin };
 
     let string_array = env.new_object_array(
         4,
@@ -65,14 +65,14 @@ pub(crate) fn get_plugin_description(env: JNIEnv, _obj: JObject, plugin: *const 
     string_array
 }
 
-pub(crate) fn enable_plugin(_env: JNIEnv, _obj: JObject, plugin: *const RustPlugin) {
-    let plugin = unsafe { &*plugin };
+pub(crate) fn enable_plugin(_env: JNIEnv, _obj: JObject, plugin: &RustPlugin) {
+    //let plugin = unsafe { &*plugin };
 
     plugin.enable();
 }
 
-pub(crate) fn disable_plugin(_env: JNIEnv, _obj: JObject, plugin: *const RustPlugin) {
-    let plugin = unsafe { &*plugin };
+pub(crate) fn disable_plugin(_env: JNIEnv, _obj: JObject, plugin: &RustPlugin) {
+    //let plugin = unsafe { &*plugin };
 
     plugin.disable();
 }
