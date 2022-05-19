@@ -8,19 +8,19 @@ struct Header {}
 pub struct Id(u64);
 
 pub(crate) struct RawTask {
-    ptr: NonNull<Header>,
+    _ptr: NonNull<Header>,
 }
 
 pub struct Listener {
-    raw: Option<RawTask>,
-    id: Id,
+    _raw: Option<RawTask>,
+    _id: Id,
     _p: PhantomData<()>,
 }
 
 impl Listener {
     pub fn new<F: Fn(Event) + Send + 'static>(fun: F) -> Listener {
         let fun = Box::new(fun);
-        unsafe { event_spawn_subscribe_always(fun) }
+        unsafe { listener_subscribe_always(fun) }
     }
 
     pub fn complete(self) {
@@ -30,7 +30,7 @@ impl Listener {
 
 #[link(name = "miraust_core")]
 extern {
-    fn event_spawn_subscribe_always(fun: Box<dyn Fn(Event) + Send + 'static>) -> Listener;
+    fn listener_subscribe_always(fun: Box<dyn Fn(Event) + Send + 'static>) -> Listener;
 
-    fn listener_stop(handle: Listener);
+    fn listener_stop(listener: Listener);
 }
