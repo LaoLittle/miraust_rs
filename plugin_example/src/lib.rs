@@ -1,4 +1,5 @@
 use miraust_api::bot::Bot;
+use miraust_api::event::listener::Listener;
 use miraust_api::plugin::{RustPluginDescription, RustPluginFunc, ToMirai};
 
 #[no_mangle]
@@ -22,6 +23,10 @@ impl ToMirai for A {
         println!("enabled!");
         let b = Bot::find_instance(1312);
         println!("{}", b.is_none());
+
+        Listener::new(|event| {
+            println!("received!");
+        });
         //println!("{:?}", std::env::current_dir().unwrap());
     }
 }
