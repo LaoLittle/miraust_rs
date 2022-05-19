@@ -9,4 +9,13 @@ edition = "2021"
 miraust_api = { path = "../miraust_api" }
 
 [lib]
-crate-type = ["dylib"]
+crate-type = ["cdylib"]
+
+[profile.release]
+panic = "abort"
+lto = true
+debug = false
+opt-level = 3
+incremental = false
+strip = true
+codegen-units = 1
