@@ -2,6 +2,7 @@ use std::lazy::SyncOnceCell;
 
 use jni::{JavaVM, JNIEnv};
 use jni::objects::{JMethodID, JStaticMethodID};
+use crate::event::Event;
 
 pub(crate) static MIRAI_ENV: SyncOnceCell<MiraiEnv> = SyncOnceCell::new();
 pub(crate) static CALLBACK_POOL: SyncOnceCell<tokio::runtime::Runtime> = SyncOnceCell::new();
@@ -9,7 +10,7 @@ pub(crate) static CALLBACK_POOL: SyncOnceCell<tokio::runtime::Runtime> = SyncOnc
 
 pub(crate) struct MiraiEnv {
     pub(crate) jvm: &'static JavaVM,
-    pub(crate) sender: tokio::sync::broadcast::Sender<()>,
+    pub(crate) sender: tokio::sync::broadcast::Sender<Event>,
     pub(crate) bot_get_instance: JStaticMethodID<'static>,
     pub(crate) bot_get_friend: JMethodID<'static>,
     pub(crate) bot_get_group: JMethodID<'static>,

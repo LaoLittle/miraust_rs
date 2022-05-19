@@ -1,15 +1,10 @@
 use std::fmt::{Display, Formatter};
 use std::mem;
 
-use std::sync::mpsc;
-
 use jni::JNIEnv;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::JavaType;
 
-use crate::contact::friend::Friend;
-use crate::contact::group::Group;
-use crate::contact::stranger::Stranger;
 use crate::jni_ffi::jni_callback::{call_back, MIRAI_ENV};
 
 pub struct Bot {
@@ -18,69 +13,6 @@ pub struct Bot {
 }
 
 impl<'a> Bot {
-    pub const fn id(&self) -> u64 {
-        self.id as u64
-    }
-
-    pub fn instances() {
-        // todo
-    }
-
-    pub fn find_instance(id: u64) -> Option<Bot> {
-        let id = if id <= i64::MAX as u64 { id as i64 } else { return None };
-
-        let (send, recv) = mpsc::channel();
-        call_back(move |env| {
-            send.send(unsafe { Bot::find_instance_unchecked(env, id) }).unwrap();
-        });
-
-        let r = recv.recv().ok()?;
-
-        r.map(|global_ref| Bot { id, inner: global_ref })
-    }
-
-    pub fn get_friend(&self, id: u64) -> Option<Friend> {
-        let id = if id <= i64::MAX as u64 { id as i64 } else { return None };
-
-        let global_ref = self.inner.clone();
-        let (send, recv) = mpsc::channel();
-        call_back(move |env| {
-            send.send(unsafe { Bot::get_friend_unchecked(global_ref, env, id) }).unwrap();
-        });
-
-        let r = recv.recv().ok()?;
-
-        r.map(|global_ref| Friend { id, inner: global_ref })
-    }
-
-    pub fn get_group(&self, id: u64) -> Option<Group> {
-        let id = if id <= i64::MAX as u64 { id as i64 } else { return None };
-
-        let global_ref = self.inner.clone();
-        let (send, recv) = mpsc::channel();
-        call_back(move |env| {
-            send.send(unsafe { Bot::get_group_unchecked(global_ref, env, id) }).unwrap();
-        });
-
-        let r = recv.recv().ok()?;
-
-        r.map(|global_ref| Group { id, inner: global_ref })
-    }
-
-    pub fn get_stranger(&self, id: u64) -> Option<Stranger> {
-        let id = if id <= i64::MAX as u64 { id as i64 } else { return None };
-
-        let global_ref = self.inner.clone();
-        let (send, recv) = mpsc::channel();
-        call_back(move |env| {
-            send.send(unsafe { Bot::get_stranger_unchecked(global_ref, env, id) }).unwrap();
-        });
-
-        let r = recv.recv().ok()?;
-
-        r.map(|global_ref| Stranger { id, inner: global_ref })
-    }
-
     /// # Safety
     /// This function will not attach thread to jvm
     pub unsafe fn find_instance_unchecked(env: JNIEnv, id: i64) -> Option<GlobalRef> {

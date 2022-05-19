@@ -6,6 +6,7 @@ use jni::sys::{jint, JNI_ERR};
 
 use crate::jni_ffi::jni_callback::{CALLBACK_POOL, MIRAI_ENV, MiraiEnv};
 use crate::plugin_loader::*;
+use crate::plugin_manager::broadcast;
 
 macro_rules! jni_method {
     ( $name:expr, $signature:expr, $fun:tt ) => {{
@@ -39,7 +40,7 @@ extern "system" fn JNI_OnLoad(jvm: JavaVM, _reserved: *mut c_void) -> jint {
     // for test now
     let class_name: &str = "org/laolittle/EventHandler";
     let jni_methods = [
-        //jni_method!("broadcast", "(Ljava/lang/String;)V", broadcast)
+        jni_method!("broadcast", "(Ljava/lang/Object;)V", broadcast)
     ];
 
     status = register_natives(&jvm, class_name, &jni_methods);
@@ -88,7 +89,7 @@ fn set_callback(jvm: JavaVM) {
 
     let bot_class = env.find_class("net/mamoe/mirai/Bot").unwrap();
 
-    let (sender, _) = tokio::sync::broadcast::channel(12);
+    let (sender, _) = tokio::sync::broadcast::channel(32);
 
     let bot_get_instance = env.get_static_method_id(bot_class, "findInstance", "(J)Lnet/mamoe/mirai/Bot;").unwrap();
     let bot_get_friend = env.get_method_id(bot_class, "getFriend", "(J)Lnet/mamoe/mirai/contact/Friend;").unwrap();
