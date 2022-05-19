@@ -1,4 +1,6 @@
-use std::error::Error;
+// unused thread pool
+
+/*use std::error::Error;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::thread::JoinHandle;
@@ -122,4 +124,4 @@ impl Status {
     fn set(&mut self, status: Status) {
         *self = status
     }
-}
+}*/

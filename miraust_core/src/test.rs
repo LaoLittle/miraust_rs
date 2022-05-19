@@ -1,8 +1,11 @@
 #[cfg(test)]
 mod tests {
+    use std::lazy::OnceCell;
     use std::sync::mpsc;
     use std::thread;
     use std::thread::JoinHandle;
+    use std::time::Duration;
+    use jni::JavaVM;
 
     #[test]
     fn lib_load() {
@@ -76,5 +79,35 @@ mod tests {
         });
 
         s.send(handle);
+    }
+
+    #[test]
+    fn broadcast_test() {
+        let (s,mut rx1) = tokio::sync::broadcast::channel::<&str>(13);
+
+        let mut rx2 = s.subscribe();
+
+        let runtime = tokio::runtime::Builder::new_multi_thread()
+            .worker_threads(3)
+            .on_thread_start(|| {
+                println!("{:?} start!", thread::current());
+            })
+            .build().unwrap();
+
+        runtime.spawn(async move {
+            let a = rx1.recv().await.unwrap();
+
+            println!("{}", a);
+        });
+
+        let handle = runtime.spawn(async move {
+            let b = rx2.recv().await.unwrap();
+
+            println!("{}", b);
+        });
+
+        s.send("xi xi, sha le ni").unwrap();
+
+        //thread::sleep(Duration::from_millis(12));
     }
 }

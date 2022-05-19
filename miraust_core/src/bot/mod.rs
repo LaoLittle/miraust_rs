@@ -10,7 +10,7 @@ use jni::signature::JavaType;
 use crate::contact::friend::Friend;
 use crate::contact::group::Group;
 use crate::contact::stranger::Stranger;
-use crate::jni_ffi::jni_callback::{CALLBACK_POOL, MIRAI_ENV};
+use crate::jni_ffi::jni_callback::{call_back, MIRAI_ENV};
 
 pub struct Bot {
     pub(crate) id: i64,
@@ -30,9 +30,9 @@ impl<'a> Bot {
         let id = if id <= i64::MAX as u64 { id as i64 } else { return None };
 
         let (send, recv) = mpsc::channel();
-        CALLBACK_POOL.get().unwrap().execute(move |env| {
+        call_back(move |env| {
             send.send(unsafe { Bot::find_instance_unchecked(env, id) }).unwrap();
-        }).ok()?;
+        });
 
         let r = recv.recv().ok()?;
 
@@ -44,9 +44,9 @@ impl<'a> Bot {
 
         let global_ref = self.inner.clone();
         let (send, recv) = mpsc::channel();
-        CALLBACK_POOL.get().unwrap().execute(move |env| {
+        call_back(move |env| {
             send.send(unsafe { Bot::get_friend_unchecked(global_ref, env, id) }).unwrap();
-        }).ok()?;
+        });
 
         let r = recv.recv().ok()?;
 
@@ -58,9 +58,9 @@ impl<'a> Bot {
 
         let global_ref = self.inner.clone();
         let (send, recv) = mpsc::channel();
-        CALLBACK_POOL.get().unwrap().execute(move |env| {
+        call_back(move |env| {
             send.send(unsafe { Bot::get_group_unchecked(global_ref, env, id) }).unwrap();
-        }).ok()?;
+        });
 
         let r = recv.recv().ok()?;
 
@@ -72,9 +72,9 @@ impl<'a> Bot {
 
         let global_ref = self.inner.clone();
         let (send, recv) = mpsc::channel();
-        CALLBACK_POOL.get().unwrap().execute(move |env| {
+        call_back(move |env| {
             send.send(unsafe { Bot::get_stranger_unchecked(global_ref, env, id) }).unwrap();
-        }).ok()?;
+        });
 
         let r = recv.recv().ok()?;
 
@@ -83,7 +83,7 @@ impl<'a> Bot {
 
     /// # Safety
     /// This function will not attach thread to jvm
-    pub unsafe fn find_instance_unchecked(env: &'a JNIEnv, id: i64) -> Option<GlobalRef> {
+    pub unsafe fn find_instance_unchecked(env: JNIEnv, id: i64) -> Option<GlobalRef> {
         let mirai = MIRAI_ENV.get()?;
 
         if let Ok(value) = env.call_static_method_unchecked(
@@ -103,7 +103,7 @@ impl<'a> Bot {
 
     /// # Safety
     /// This function will not attach thread to jvm
-    pub unsafe fn get_friend_unchecked(global_ref: GlobalRef, env: &'a JNIEnv, id: i64) -> Option<GlobalRef> {
+    pub unsafe fn get_friend_unchecked(global_ref: GlobalRef, env: JNIEnv, id: i64) -> Option<GlobalRef> {
         let mirai = MIRAI_ENV.get()?;
 
         if let Ok(value) = env.call_method_unchecked(
@@ -123,7 +123,7 @@ impl<'a> Bot {
 
     /// # Safety
     /// This function will not attach thread to jvm
-    pub unsafe fn get_group_unchecked(global_ref: GlobalRef, env: &'a JNIEnv, id: i64) -> Option<GlobalRef> {
+    pub unsafe fn get_group_unchecked(global_ref: GlobalRef, env: JNIEnv, id: i64) -> Option<GlobalRef> {
         let mirai = MIRAI_ENV.get()?;
 
         if let Ok(value) = env.call_method_unchecked(
@@ -143,7 +143,7 @@ impl<'a> Bot {
 
     /// # Safety
     /// This function will not attach thread to jvm
-    pub unsafe fn get_stranger_unchecked(global_ref: GlobalRef, env: &'a JNIEnv, id: i64) -> Option<GlobalRef> {
+    pub unsafe fn get_stranger_unchecked(global_ref: GlobalRef, env: JNIEnv, id: i64) -> Option<GlobalRef> {
         let mirai = MIRAI_ENV.get()?;
 
         if let Ok(value) = env.call_method_unchecked(

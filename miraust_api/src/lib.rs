@@ -2,6 +2,7 @@ pub mod bot;
 mod jni_struct;
 pub mod contact;
 pub mod plugin;
+pub mod event;
 
 #[cfg(test)]
 mod tests {
