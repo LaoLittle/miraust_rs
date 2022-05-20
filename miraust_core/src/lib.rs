@@ -11,3 +11,5 @@ mod bot;
 mod contact;
 mod api;
 mod event;
+mod managed;
+mod message;

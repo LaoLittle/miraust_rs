@@ -1,14 +1,13 @@
 use crate::contact::Contact;
-use crate::jni_struct::GlobalRef;
+use crate::managed::Managed;
 
 pub struct Member {
-    pub(crate) id: i64,
-    pub(crate) inner: GlobalRef,
+    pub(crate) inner: Managed,
 }
 
 impl Contact for Member {
     fn id(&self) -> u64 {
-        self.id as _
+        todo!()
     }
 
     fn send_message(&self) {

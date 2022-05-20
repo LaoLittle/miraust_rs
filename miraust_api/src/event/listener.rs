@@ -1,36 +1,27 @@
 use std::marker::PhantomData;
 use std::ptr::NonNull;
 use crate::event::Event;
-
-struct Header {}
-
-#[derive(Clone, Debug, Hash, Eq, PartialEq)]
-pub struct Id(u64);
-
-pub(crate) struct RawTask {
-    _ptr: NonNull<Header>,
-}
+use crate::managed::Managed;
 
 pub struct Listener {
-    _raw: Option<RawTask>,
-    _id: Id,
-    _p: PhantomData<()>,
+    inner: Managed,
 }
 
 impl Listener {
     pub fn new<F: Fn(Event) + Send + 'static>(fun: F) -> Listener {
         let fun = Box::new(fun);
-        unsafe { listener_subscribe_always(fun) }
+        let ptr = unsafe { listener_subscribe_always(fun) };
+        Listener { inner: Managed::new(ptr, 11) }
     }
 
-    pub fn complete(self) {
-        unsafe { listener_stop(self) };
+    pub fn complete(&self) {
+        unsafe { listener_stop(self.inner.pointer) };
     }
 }
 
 #[link(name = "miraust_core")]
 extern {
-    fn listener_subscribe_always(fun: Box<dyn Fn(Event) + Send + 'static>) -> Listener;
+    fn listener_subscribe_always(fun: Box<dyn Fn(Event) + Send + 'static>) -> *mut ();
 
-    fn listener_stop(listener: Listener);
+    fn listener_stop(listener: *const ());
 }

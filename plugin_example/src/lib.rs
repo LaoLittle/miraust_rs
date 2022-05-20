@@ -25,7 +25,7 @@ impl ToMirai for A {
         println!("{}", b.is_none());
 
         Listener::new(|event| {
-            println!("received!");
+            println!("received! {:?}", event);
         });
         //println!("{:?}", std::env::current_dir().unwrap());
     }

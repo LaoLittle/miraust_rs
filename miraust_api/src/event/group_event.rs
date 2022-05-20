@@ -3,6 +3,7 @@ use crate::contact::group::Group;
 
 use crate::event::message_event::MessageEvent;
 
+
 trait GroupEvent {
     fn group(&self) -> Group;
 }

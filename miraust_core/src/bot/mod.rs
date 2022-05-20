@@ -1,18 +1,16 @@
-use std::fmt::{Display, Formatter};
 use std::mem;
 
 use jni::JNIEnv;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::JavaType;
 
-use crate::jni_ffi::jni_callback::{call_back, MIRAI_ENV};
+use crate::jni_ffi::jni_callback::{MIRAI_ENV};
 
 pub struct Bot {
-    pub(crate) id: i64,
     pub(crate) inner: GlobalRef,
 }
 
-impl<'a> Bot {
+impl Bot {
     /// # Safety
     /// This function will not attach thread to jvm
     pub unsafe fn find_instance_unchecked(env: JNIEnv, id: i64) -> Option<GlobalRef> {
@@ -101,11 +99,5 @@ trait CanBeNull {
 impl<'a> CanBeNull for JObject<'a> {
     fn is_null(&self) -> bool {
         unsafe { *mem::transmute::<&JObject, &usize>(self) == 0 }
-    }
-}
-
-impl Display for Bot {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Bot: {}", self.id)
     }
 }

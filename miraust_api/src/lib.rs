@@ -1,14 +1,11 @@
 pub mod bot;
-mod jni_struct;
 pub mod contact;
 pub mod plugin;
 pub mod event;
+pub(crate) mod managed;
 
 #[cfg(test)]
 mod tests {
-    use std::mem::size_of;
-    use crate::jni_struct::{GlobalRef};
-
     #[test]
     fn it_works() {
         let result = 2 + 2;
