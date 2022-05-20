@@ -1,16 +1,39 @@
+use crate::contact::Contact;
+use crate::event::friend::FriendMessageEvent;
+use crate::event::group::GroupMessageEvent;
 use crate::managed::Managed;
 
-pub mod group_event;
-pub mod message_event;
-pub mod friend_event;
 pub mod listener;
+pub mod group;
+mod friend;
 
 #[derive(Debug)]
 #[repr(C)]
-pub struct Event {
-    pub(crate) inner: Managed
+pub struct EventManaged {
+    pub(crate) inner: Managed,
+    pub(crate) event_type: u8,
 }
 
-trait HasSubject {
+pub enum Event {
+    MessageEvent(MessageEvent),
+    GroupMessageEvent(GroupMessageEvent),
+    FriendMessageEvent(FriendMessageEvent),
+    Any(EventManaged),
+}
 
+pub struct MessageEvent {
+    pub(crate) inner: Managed,
+}
+
+impl MessageEvent {
+    fn subject(&self) -> Contact {
+        let ptr = unsafe { message_event_get_subject(self.inner.pointer) };
+
+        Contact { inner: Managed::new(ptr, 20) }
+    }
+}
+
+#[link(name = "miraust_core")]
+extern {
+    fn message_event_get_subject(event: *const ()) -> *mut ();
 }
