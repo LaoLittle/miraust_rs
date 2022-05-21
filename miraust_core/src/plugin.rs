@@ -3,7 +3,7 @@ use std::marker::PhantomPinned;
 use libloading::Library;
 
 pub struct RustPlugin {
-    lib: Library,
+    _lib: Library,
     func: RustPluginFunc,
     _mark: PhantomPinned,
 }
@@ -32,14 +32,10 @@ impl RustPlugin {
 
     pub fn new(lib: Library, func: RustPluginFunc) -> RustPlugin {
         RustPlugin {
-            lib,
+            _lib: lib,
             func,
             _mark: PhantomPinned,
         }
-    }
-
-    pub fn origin_lib(&self) -> &Library {
-        &self.lib
     }
 }
 
@@ -51,7 +47,7 @@ pub struct RustPluginDescription {
     pub version: String,
 }
 
-impl RustPluginDescription {
+/*impl RustPluginDescription {
     pub fn new(id: &str, version: &str) -> RustPluginDescription {
         Self::default(id, version)
     }
@@ -64,9 +60,9 @@ impl RustPluginDescription {
             version: version.into(),
         }
     }
-}
+}*/
 
-pub trait ToMirai {
+/*pub trait ToMirai {
     fn description() -> RustPluginDescription;
 
     fn on_enable();
@@ -78,4 +74,4 @@ pub trait ToMirai {
     fn register(&self) -> RustPluginFunc {
         RustPluginFunc { description_fun: Self::description, on_enable_fun: Self::on_enable, on_disable_fun: Self::on_disable }
     }
-}
+}*/

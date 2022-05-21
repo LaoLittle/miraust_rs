@@ -3,6 +3,7 @@ pub mod contact;
 pub mod plugin;
 pub mod event;
 pub(crate) mod managed;
+pub mod message;
 
 #[cfg(test)]
 mod tests {

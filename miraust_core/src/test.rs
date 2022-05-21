@@ -1,11 +1,8 @@
 #[cfg(test)]
 mod tests {
-    use std::lazy::OnceCell;
     use std::sync::mpsc;
     use std::thread;
     use std::thread::JoinHandle;
-    use std::time::Duration;
-    use jni::JavaVM;
 
     #[test]
     fn lib_load() {
@@ -56,7 +53,7 @@ mod tests {
         }
     }
 
-    #[test]
+    /*#[test]
     fn channel() {
         let (sender, recv) = crossbeam::channel::unbounded::<i32>();
         drop(sender);
@@ -68,7 +65,7 @@ mod tests {
             }
             println!("Exit!");
         });
-    }
+    }*/
 
     #[test]
     fn shit() {
@@ -83,7 +80,7 @@ mod tests {
 
     #[test]
     fn broadcast_test() {
-        let (s,mut rx1) = tokio::sync::broadcast::channel::<&str>(13);
+        let (s, mut rx1) = tokio::sync::broadcast::channel::<&str>(13);
 
         let mut rx2 = s.subscribe();
 

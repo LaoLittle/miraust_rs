@@ -1,8 +1,7 @@
-
+use crate::contact::Contact;
 use crate::contact::friend::Friend;
 use crate::contact::group::Group;
 use crate::contact::stranger::Stranger;
-
 use crate::managed::Managed;
 
 pub struct Bot {
@@ -21,17 +20,17 @@ impl Bot {
 
     pub fn get_friend(&self, id: u64) -> Option<Friend> {
         let ptr = unsafe { bot_get_friend(self.inner.pointer, id) };
-        if ptr.is_null() {None} else { Some(Friend { inner: Managed::new(ptr, 1) }) }
+        if ptr.is_null() { None } else { Some(Friend { contact: Contact { inner: Managed::new(ptr, 0) } }) }
     }
 
     pub fn get_group(&self, id: u64) -> Option<Group> {
-        let ptr =  unsafe { bot_get_group(self.inner.pointer, id) };
-        if ptr.is_null() {None} else { Some(Group { inner: Managed::new(ptr, 2) }) }
+        let ptr = unsafe { bot_get_group(self.inner.pointer, id) };
+        if ptr.is_null() { None } else { Some(Group { contact: Contact { inner: Managed::new(ptr, 0) } }) }
     }
 
     pub fn get_stranger(&self, id: u64) -> Option<Stranger> {
         let ptr = unsafe { bot_get_stranger(self.inner.pointer, id) };
-        if ptr.is_null() {None} else { Some(Stranger { inner: Managed::new(ptr, 3) }) }
+        if ptr.is_null() { None } else { Some(Stranger { contact: Contact { inner: Managed::new(ptr, 0) } }) }
     }
 }
 

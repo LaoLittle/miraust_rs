@@ -10,5 +10,5 @@ version = "0.1.0"
 name = "plugin_example"
 version = "0.1.0"
 dependencies = [
- "miraust_api",
+    "miraust_api",
 ]

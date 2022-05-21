@@ -1,4 +1,5 @@
 use miraust_api::bot::Bot;
+use miraust_api::event::Event;
 use miraust_api::event::listener::Listener;
 use miraust_api::plugin::{RustPluginDescription, RustPluginFunc, ToMirai};
 
@@ -15,7 +16,7 @@ impl ToMirai for A {
             author: None,
             id: "org.laolittle".to_string(),
             name: None,
-            version: "0.0.1".to_string()
+            version: "0.0.1".to_string(),
         }
     }
 
@@ -25,7 +26,15 @@ impl ToMirai for A {
         println!("{}", b.is_none());
 
         Listener::new(|event| {
-            println!("received! {:?}", event);
+            match event {
+                Event::GroupMessageEvent(g) => {
+                    let msg = g.message().to_string();
+                    println!("In Rust: {}", msg);
+                }
+                _ => {
+
+                }
+            }
         });
         //println!("{:?}", std::env::current_dir().unwrap());
     }

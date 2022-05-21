@@ -1,11 +1,7 @@
+use jni::objects::GlobalRef;
 use tokio::task::JoinHandle;
-use crate::bot::Bot;
-use crate::contact::friend::Friend;
-use crate::contact::group::Group;
-use crate::contact::stranger::Stranger;
-use crate::event::Event;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[repr(C)]
 pub(crate) struct Managed {
     pub(crate) pointer: *mut (),
@@ -23,26 +19,12 @@ extern fn drop_res(res: *mut (), t: u8) {
     unsafe {
         match t {
             0 => {
-                Box::from_raw(res as *mut Bot);
-            }
-            1 => {
-                Box::from_raw(res as *mut Friend);
-            }
-            2 => {
-                Box::from_raw(res as *mut Group);
-            }
-            3 => {
-                Box::from_raw(res as *mut Stranger);
+                Box::from_raw(res as *mut GlobalRef);
             }
             11 => {
                 Box::from_raw(res as *mut Listener);
             }
-            12 => {
-                Box::from_raw(res as *mut Event);
-            }
-            _ => {
-
-            }
+            _ => {}
         };
     }
 }

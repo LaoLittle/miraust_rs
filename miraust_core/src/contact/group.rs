@@ -1,5 +1,6 @@
 use jni::objects::GlobalRef;
+use crate::contact::Contact;
 
 pub struct Group {
-    pub(crate) inner: GlobalRef,
+    pub(crate) contact: Contact,
 }

@@ -1,22 +1,11 @@
 use crate::contact::Contact;
-use crate::managed::Managed;
 
 pub struct Member {
-    pub(crate) inner: Managed,
-}
-
-impl Contact for Member {
-    fn id(&self) -> u64 {
-        todo!()
-    }
-
-    fn send_message(&self) {
-        todo!()
-    }
+    pub(crate) inner: Contact,
 }
 
 pub struct NormalMember {
-    pub(crate) member: Member
+    pub(crate) member: Member,
 }
 
 impl TryFrom<Member> for NormalMember {
@@ -27,35 +16,17 @@ impl TryFrom<Member> for NormalMember {
     }
 }
 
-impl Into<Member> for NormalMember {
-    fn into(self) -> Member {
-        self.member
+impl From<NormalMember> for Member {
+    fn from(nm: NormalMember) -> Self {
+        nm.member
     }
 }
 
-impl Contact for NormalMember {
-    fn id(&self) -> u64 {
-        self.member.id()
-    }
-
-    fn send_message(&self) {
-        self.member.send_message()
-    }
-}
 
 pub struct AnonymousMember {
-    pub(crate) member: Member
+    pub(crate) member: Member,
 }
 
-impl Contact for AnonymousMember {
-    fn id(&self) -> u64 {
-        self.member.id()
-    }
-
-    fn send_message(&self) {
-        self.member.send_message()
-    }
-}
 
 impl TryFrom<Member> for AnonymousMember {
     type Error = Member;
@@ -65,8 +36,8 @@ impl TryFrom<Member> for AnonymousMember {
     }
 }
 
-impl Into<Member> for AnonymousMember {
-    fn into(self) -> Member {
-        self.member
+impl From<AnonymousMember> for Member {
+    fn from(am: AnonymousMember) -> Self {
+        am.member
     }
 }

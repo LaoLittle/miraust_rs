@@ -4,7 +4,7 @@ use jni::JNIEnv;
 use jni::objects::{GlobalRef, JObject, JValue};
 use jni::signature::JavaType;
 
-use crate::jni_ffi::jni_callback::{MIRAI_ENV};
+use crate::jni_ffi::jni_callback::MIRAI_ENV;
 
 pub struct Bot {
     pub(crate) inner: GlobalRef,
@@ -23,7 +23,7 @@ impl Bot {
             &[JValue::Long(id)],
         ) {
             let obj = value.l().ok()?;
-            if obj.is_null() { return None }
+            if obj.is_null() { return None; }
 
             Some(env.new_global_ref(obj).ok()?)
         } else {
@@ -43,7 +43,7 @@ impl Bot {
             &[JValue::Long(id)],
         ) {
             let obj = value.l().ok()?;
-            if obj.is_null() { return None }
+            if obj.is_null() { return None; }
 
             Some(env.new_global_ref(obj).ok()?)
         } else {
@@ -63,7 +63,7 @@ impl Bot {
             &[JValue::Long(id)],
         ) {
             let obj = value.l().ok()?;
-            if obj.is_null() { return None }
+            if obj.is_null() { return None; }
 
             Some(env.new_global_ref(obj).ok()?)
         } else {
@@ -83,21 +83,11 @@ impl Bot {
             &[JValue::Long(id)],
         ) {
             let obj = value.l().ok()?;
-            if obj.is_null() { return None }
+            if obj.is_null() { return None; }
 
             Some(env.new_global_ref(obj).ok()?)
         } else {
             None
         }
-    }
-}
-
-trait CanBeNull {
-    fn is_null(&self) -> bool;
-}
-
-impl<'a> CanBeNull for JObject<'a> {
-    fn is_null(&self) -> bool {
-        unsafe { *mem::transmute::<&JObject, &usize>(self) == 0 }
     }
 }

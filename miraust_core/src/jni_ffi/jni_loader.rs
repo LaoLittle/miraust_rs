@@ -1,7 +1,6 @@
 use std::ffi::c_void;
 
 use jni::{JavaVM, JNIEnv, NativeMethod};
-
 use jni::sys::{jint, JNI_ERR};
 
 use crate::jni_ffi::jni_callback::{CALLBACK_POOL, MIRAI_ENV, MiraiEnv};
@@ -40,7 +39,7 @@ extern "system" fn JNI_OnLoad(jvm: JavaVM, _reserved: *mut c_void) -> jint {
     // for test now
     let class_name: &str = "org/laolittle/EventHandler";
     let jni_methods = [
-        jni_method!("broadcast", "(Ljava/lang/Object;)V", broadcast)
+        jni_method!("broadcast", "(Lnet/mamoe/mirai/event/Event;B)V", broadcast)
     ];
 
     status = register_natives(&jvm, class_name, &jni_methods);
@@ -52,7 +51,7 @@ extern "system" fn JNI_OnLoad(jvm: JavaVM, _reserved: *mut c_void) -> jint {
         .worker_threads(16)
         .on_thread_start(|| {
             let jvm = MIRAI_ENV.get().unwrap().jvm;
-            jvm.attach_current_thread_as_daemon().unwrap();
+            jvm.attach_current_thread_as_daemon().expect("Cannot attach thread to JavaVM");
         })
         .build().unwrap();
 
@@ -62,14 +61,14 @@ extern "system" fn JNI_OnLoad(jvm: JavaVM, _reserved: *mut c_void) -> jint {
 }
 
 fn register_natives(jvm: &JavaVM, class_name: &str, methods: &[NativeMethod]) -> jint {
-    let env: JNIEnv = jvm.get_env().unwrap();
-    let jni_version = env.get_version().unwrap();
+    let env: JNIEnv = jvm.get_env().expect("Not from JavaVM");
+    let jni_version = env.get_version().expect("Unknown Jvm version");
     let version: jint = jni_version.into();
 
     let clazz = match env.find_class(class_name) {
         Ok(clazz) => clazz,
         Err(e) => {
-            eprintln!("java class not found : {:?}", e);
+            eprintln!("java class not found: {:?}", e);
             return JNI_ERR;
         }
     };
@@ -87,14 +86,23 @@ fn set_callback(jvm: JavaVM) {
     let jvm: &'static JavaVM = Box::leak(jvm);
     let env = jvm.get_env().unwrap();
 
-    let bot_class = env.find_class("net/mamoe/mirai/Bot").unwrap();
-
     let (sender, _) = tokio::sync::broadcast::channel(32);
 
+    // bot
+    let bot_class = env.find_class("net/mamoe/mirai/Bot").unwrap();
     let bot_get_instance = env.get_static_method_id(bot_class, "findInstance", "(J)Lnet/mamoe/mirai/Bot;").unwrap();
     let bot_get_friend = env.get_method_id(bot_class, "getFriend", "(J)Lnet/mamoe/mirai/contact/Friend;").unwrap();
     let bot_get_group = env.get_method_id(bot_class, "getGroup", "(J)Lnet/mamoe/mirai/contact/Group;").unwrap();
     let bot_get_stranger = env.get_method_id(bot_class, "getStranger", "(J)Lnet/mamoe/mirai/contact/Stranger;").unwrap();
+
+    // message event
+    let message_event_class = env.find_class("net/mamoe/mirai/event/events/MessageEvent").unwrap();
+    let message_event_get_subject = env.get_method_id(message_event_class, "getSubject", "()Lnet/mamoe/mirai/contact/Contact;").unwrap();
+    let message_event_get_message = env.get_method_id(message_event_class, "getMessage", "()Lnet/mamoe/mirai/message/data/MessageChain;").unwrap();
+
+    // message
+    let message_class = env.find_class("net/mamoe/mirai/message/data/Message").unwrap();
+    let message_to_string = env.get_method_id(message_class, "toString", "()Ljava/lang/String;").unwrap();
     if MIRAI_ENV.set(MiraiEnv {
         jvm,
         sender,
@@ -102,6 +110,9 @@ fn set_callback(jvm: JavaVM) {
         bot_get_friend,
         bot_get_group,
         bot_get_stranger,
+        message_event_get_subject,
+        message_event_get_message,
+        message_to_string,
     }).is_err() {
         env.throw_new("java/lang/RuntimeException", "").unwrap();
     };

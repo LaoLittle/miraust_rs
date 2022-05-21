@@ -1,7 +1,8 @@
 use jni::objects::GlobalRef;
+use crate::contact::Contact;
 
 pub struct Friend {
-    pub(crate) inner: GlobalRef,
+    pub(crate) contact: Contact,
 }
 
 impl Friend {
