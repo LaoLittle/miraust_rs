@@ -1,7 +1,6 @@
 use crate::contact::friend::Friend;
 use crate::event::MessageEvent;
 
-
 pub struct FriendMessageEvent {
     pub(crate) e: MessageEvent,
 }

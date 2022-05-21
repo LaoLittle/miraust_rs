@@ -31,9 +31,7 @@ impl ToMirai for A {
                     let msg = g.message().to_string();
                     println!("In Rust: {}", msg);
                 }
-                _ => {
-
-                }
+                _ => {}
             }
         });
         //println!("{:?}", std::env::current_dir().unwrap());

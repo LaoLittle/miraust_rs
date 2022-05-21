@@ -33,7 +33,7 @@ impl MessageEvent {
     }
 
     fn message(&self) -> MessageChain {
-        let ptr = unsafe { message_event_get_subject(self.inner.pointer) };
+        let ptr = unsafe { message_event_get_message(self.inner.pointer) };
 
         MessageChain { m: Message { inner: Managed::new(ptr, 0) } }
     }

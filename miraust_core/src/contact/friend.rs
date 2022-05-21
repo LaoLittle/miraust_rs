@@ -1,4 +1,5 @@
 use jni::objects::GlobalRef;
+
 use crate::contact::Contact;
 
 pub struct Friend {

@@ -1,12 +1,10 @@
 use crate::managed::Managed;
 
 pub struct Message {
-    pub(crate) inner: Managed
+    pub(crate) inner: Managed,
 }
 
-impl Message {
-
-}
+impl Message {}
 
 impl ToString for Message {
     fn to_string(&self) -> String {
@@ -15,7 +13,7 @@ impl ToString for Message {
 }
 
 pub struct MessageChain {
-    pub(crate) m: Message
+    pub(crate) m: Message,
 }
 
 impl ToString for MessageChain {

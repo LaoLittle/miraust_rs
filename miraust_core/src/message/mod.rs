@@ -1,14 +1,15 @@
 use jni::JNIEnv;
 use jni::objects::GlobalRef;
 use jni::signature::JavaType;
+
 use crate::jni_ffi::jni_callback::MIRAI_ENV;
 
 pub struct Message {
-    inner: GlobalRef
+    inner: GlobalRef,
 }
 
 impl Message {
-    pub unsafe fn to_string_unchecked(global_ref: GlobalRef ,env: JNIEnv) -> Option<String> {
+    pub unsafe fn to_string_unchecked(global_ref: GlobalRef, env: JNIEnv) -> Option<String> {
         let mirai = MIRAI_ENV.get()?;
 
         if let Ok(value) = env.call_method_unchecked(

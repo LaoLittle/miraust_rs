@@ -1,4 +1,5 @@
 use std::sync::mpsc;
+
 use jni::objects::GlobalRef;
 
 use crate::contact::Contact;
