@@ -1,12 +1,10 @@
 use crate::contact::friend::Friend;
-use crate::event::MessageEvent;
+use crate::event::{MessageEvent};
 
-pub struct FriendMessageEvent {
-    pub(crate) e: MessageEvent,
-}
+pub struct FriendMessageEvent(pub(crate) MessageEvent);
 
 impl FriendMessageEvent {
     fn subject(&self) -> Friend {
-        Friend { contact: self.e.subject() }
+        Friend(self.0.subject())
     }
 }

@@ -1,3 +1,4 @@
+use std::ops::Deref;
 use crate::contact::Contact;
 use crate::event::friend::FriendMessageEvent;
 use crate::event::group::GroupMessageEvent;
@@ -21,21 +22,25 @@ pub enum Event {
     Any(EventManaged),
 }
 
-pub struct MessageEvent {
-    pub(crate) inner: Managed,
-}
+pub struct BaseEvent(pub(crate) Managed);
+
+pub struct MessageEvent(pub(crate) BaseEvent);
 
 impl MessageEvent {
-    fn subject(&self) -> Contact {
-        let ptr = unsafe { message_event_get_subject(self.inner.pointer) };
-
-        Contact { inner: Managed::new(ptr, 0) }
+    fn from_managed(m: Managed) -> MessageEvent {
+        Self(BaseEvent(m))
     }
 
-    fn message(&self) -> MessageChain {
-        let ptr = unsafe { message_event_get_message(self.inner.pointer) };
+    pub fn subject(&self) -> Contact {
+        let ptr = unsafe { message_event_get_subject(self.0.0.pointer) };
 
-        MessageChain { m: Message { inner: Managed::new(ptr, 0) } }
+        Contact(Managed::new(ptr, 0))
+    }
+
+    pub fn message(&self) -> MessageChain {
+        let ptr = unsafe { message_event_get_message(self.0.0.pointer) };
+
+        MessageChain { m: Message(Managed::new(ptr, 0)) }
     }
 }
 

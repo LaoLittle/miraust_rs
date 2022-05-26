@@ -13,8 +13,8 @@ impl Listener {
             let inner = e.inner;
             let event_rs = match e.event_type {
                 // 1 => Event::MessageEvent(MessageEvent { inner }),
-                1 => Event::GroupMessageEvent(GroupMessageEvent { e: MessageEvent { inner } }),
-                2 => Event::FriendMessageEvent(FriendMessageEvent { e: MessageEvent { inner } }),
+                1 => Event::GroupMessageEvent(GroupMessageEvent(MessageEvent::from_managed(inner))),
+                2 => Event::FriendMessageEvent(FriendMessageEvent(MessageEvent::from_managed(inner))),
                 _ => Event::Any(EventManaged { inner, event_type: e.event_type })
             };
 

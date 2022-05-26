@@ -1,14 +1,12 @@
 use crate::managed::Managed;
 
-pub struct Message {
-    pub(crate) inner: Managed,
-}
+pub struct Message(pub(crate) Managed);
 
 impl Message {}
 
 impl ToString for Message {
     fn to_string(&self) -> String {
-        unsafe { message_to_string(self.inner.pointer) }
+        unsafe { message_to_string(self.0.pointer) }
     }
 }
 
