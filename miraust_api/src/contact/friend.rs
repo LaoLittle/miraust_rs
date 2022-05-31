@@ -1,3 +1,3 @@
-use crate::contact::Contact;
+use crate::contact::ContactImpl;
 
-pub struct Friend(pub(crate) Contact);
+pub struct Friend(pub(crate) ContactImpl);
