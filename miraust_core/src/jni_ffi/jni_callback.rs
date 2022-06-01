@@ -3,7 +3,7 @@ use std::sync::mpsc;
 
 use jni::{JavaVM, JNIEnv};
 use jni::objects::{GlobalRef, JMethodID, JStaticMethodID};
-
+use tokio::task::JoinHandle;
 
 
 pub(crate) static MIRAI_ENV: SyncOnceCell<MiraiEnv> = SyncOnceCell::new();
@@ -22,15 +22,15 @@ pub(crate) struct MiraiEnv {
     pub(crate) message_to_string: JMethodID<'static>,
 }
 
-pub(crate) fn spawn_call_back<F>(fun: F) -> tokio::task::JoinHandle<()>
+pub(crate) fn spawn_call_back<F>(fun: F) -> JoinHandle<()>
     where F: FnOnce(JNIEnv) + Send + 'static
 {
     let runtime = CALLBACK_POOL.get().unwrap();
     let mirai = MIRAI_ENV.get().unwrap();
 
-    runtime.spawn(async {
+    runtime.spawn_blocking(move || {
         let env = mirai.jvm.get_env().unwrap();
-        fun(env)
+        fun(env);
     })
 }
 

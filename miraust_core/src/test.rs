@@ -4,6 +4,7 @@ mod tests {
     use std::sync::{Arc, mpsc};
     use std::thread;
     use std::thread::JoinHandle;
+    use tokio::runtime::Runtime;
     use tokio::task::yield_now;
 
     #[test]
@@ -151,5 +152,28 @@ mod tests {
         });
 
         t2.join().unwrap();
+    }
+
+    #[test]
+    fn rt_drop() {
+        fn start(runtime: &Runtime) {
+            drop(runtime.spawn(async {
+                println!("!@#@#%&(*&!#(*&");
+            }))
+        }
+
+        let rt = tokio::runtime::Builder::new_multi_thread()
+            .worker_threads(16)
+            .build().unwrap();
+
+        let rt = Arc::new(rt);
+        let rt0 = rt.clone();
+        let handle = thread::spawn(move || {
+            start(&*rt0);
+            start(&*rt0);
+        });
+
+        start(&rt);
+        handle.join().unwrap();
     }
 }

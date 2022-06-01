@@ -23,7 +23,7 @@ impl ToMirai for A {
 
     fn on_enable() {
         println!("enabled!");
-        for _ in 0..=2 {
+        for _ in 0..2 {
             let b = Bot::find_instance(1312);
             println!("{}", b.is_none());
         }
@@ -41,11 +41,6 @@ impl ToMirai for A {
                 }
             }
         });
-
-        for _ in 0..=2 {
-            let b = Bot::find_instance(1312);
-            println!("{}", b.is_none());
-        }
 
         mem::forget(listener);
         //println!("{:?}", std::env::current_dir().unwrap());
