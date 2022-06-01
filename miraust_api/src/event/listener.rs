@@ -1,4 +1,4 @@
-use crate::event::{Event, EventManaged, MessageEvent};
+use crate::event::{Event, MessageEventImpl};
 use crate::event::friend::FriendMessageEvent;
 use crate::event::group::GroupMessageEvent;
 use crate::managed::Managed;
@@ -9,13 +9,13 @@ pub struct Listener {
 
 impl Listener {
     pub fn new<F: Fn(Event) + Send + 'static>(fun: F) -> Listener {
-        let fun = Box::new(move |e: EventManaged| {
-            let inner = e.inner;
-            let event_rs = match e.event_type {
+        let fun = Box::new(move |e: *mut (), t: u8| {
+            let ma = Managed::new(e,0);
+            let event_rs = match t {
                 // 1 => Event::MessageEvent(MessageEvent { inner }),
-                1 => Event::GroupMessageEvent(GroupMessageEvent(MessageEvent::from_managed(inner))),
-                2 => Event::FriendMessageEvent(FriendMessageEvent(MessageEvent::from_managed(inner))),
-                _ => Event::Any(EventManaged { inner, event_type: e.event_type })
+                1 => Event::GroupMessageEvent(GroupMessageEvent(MessageEventImpl::from_managed(ma))),
+                2 => Event::FriendMessageEvent(FriendMessageEvent(MessageEventImpl::from_managed(ma))),
+                _ => Event::Any
             };
 
             fun(event_rs);
@@ -42,7 +42,7 @@ impl ListenerBuilder {
 */
 #[link(name = "miraust_core")]
 extern {
-    fn listener_subscribe_always(fun: Box<dyn Fn(EventManaged) + Send + 'static>) -> *mut ();
+    fn listener_subscribe_always(fun: Box<dyn Fn(*mut (), u8) + Send + 'static>) -> *mut ();
 
     fn listener_stop(listener: *const ());
 }

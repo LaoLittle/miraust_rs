@@ -1,5 +1,5 @@
-use std::ops::Deref;
-use crate::contact::Contact;
+
+use crate::contact::{Contact};
 use crate::event::friend::FriendMessageEvent;
 use crate::event::group::GroupMessageEvent;
 use crate::managed::Managed;
@@ -9,35 +9,37 @@ pub mod listener;
 pub mod group;
 mod friend;
 
-#[derive(Debug)]
-#[repr(C)]
-pub struct EventManaged {
-    pub(crate) inner: Managed,
-    pub(crate) event_type: u8,
-}
-
 pub enum Event {
     GroupMessageEvent(GroupMessageEvent),
     FriendMessageEvent(FriendMessageEvent),
-    Any(EventManaged),
+    Any,
 }
 
 pub struct BaseEvent(pub(crate) Managed);
 
-pub struct MessageEvent(pub(crate) BaseEvent);
+pub trait MessageEvent {
+    fn subject(&self) -> Contact;
 
-impl MessageEvent {
-    fn from_managed(m: Managed) -> MessageEvent {
+    fn message(&self) -> MessageChain;
+}
+
+pub(crate) struct MessageEventImpl(pub(crate) BaseEvent);
+
+impl MessageEventImpl {
+    fn from_managed(m: Managed) -> MessageEventImpl {
         Self(BaseEvent(m))
     }
+}
 
-    pub fn subject(&self) -> Contact {
+impl MessageEvent for MessageEventImpl {
+    fn subject(&self) -> Contact {
+        println!("MessageEvent::subject");
         let ptr = unsafe { message_event_get_subject(self.0.0.pointer) };
 
         Contact(Managed::new(ptr, 0))
     }
 
-    pub fn message(&self) -> MessageChain {
+    fn message(&self) -> MessageChain {
         let ptr = unsafe { message_event_get_message(self.0.0.pointer) };
 
         MessageChain { m: Message(Managed::new(ptr, 0)) }

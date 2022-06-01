@@ -1,3 +1,6 @@
+mod builder;
+mod single;
+
 use crate::managed::Managed;
 
 pub struct Message(pub(crate) Managed);

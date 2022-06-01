@@ -1,8 +1,10 @@
 #[cfg(test)]
 mod tests {
-    use std::sync::mpsc;
+    use std::io::repeat;
+    use std::sync::{Arc, mpsc};
     use std::thread;
     use std::thread::JoinHandle;
+    use tokio::task::yield_now;
 
     #[test]
     fn lib_load() {
@@ -84,8 +86,8 @@ mod tests {
 
         let mut rx2 = s.subscribe();
 
-        let runtime = tokio::runtime::Builder::new_multi_thread()
-            .worker_threads(3)
+        let runtime = tokio::runtime::Builder::new_current_thread()
+            .worker_threads(4)
             .on_thread_start(|| {
                 println!("{:?} start!", thread::current());
             })
@@ -93,18 +95,61 @@ mod tests {
 
         runtime.spawn(async move {
             let a = rx1.recv().await.unwrap();
-
-            println!("{}", a);
+            yield_now().await;
         });
 
         let handle = runtime.spawn(async move {
-            let b = rx2.recv().await.unwrap();
-
-            println!("{}", b);
+            while let Ok(b) = rx2.recv().await {
+                println!("{}", b);
+            }
         });
 
-        s.send("xi xi, sha le ni").unwrap();
+        for _ in 0..=5 {
+            s.send("嘻嘻鲨了你").unwrap();
+        }
+        println!("??");
+        runtime.block_on(async {
+            //handle.await.unwrap();
+        });
 
         //thread::sleep(Duration::from_millis(12));
+    }
+
+    #[test]
+    fn runtime() {
+        let rt = tokio::runtime::Builder::new_multi_thread()
+            .worker_threads(16)
+            .on_thread_start(|| {
+                println!("?");
+            })
+            .build().unwrap();
+
+        let rt = Arc::new(rt);
+
+        let rt0 = rt.clone();
+        thread::spawn(move || {
+            loop {
+                rt0.spawn(async {
+                    println!("Hello0!");
+
+                });
+            }
+        });
+
+        let rt1 = rt.clone();
+        let t2 = thread::spawn(move || {
+            println!("{:?}", thread::current());
+            rt1.spawn(async {
+                println!("{:?}", thread::current());
+                println!("Hello1!");
+            });
+        });
+
+        rt.block_on(async {
+
+            println!("12");
+        });
+
+        t2.join().unwrap();
     }
 }

@@ -1,8 +1,8 @@
 use crate::contact::group::Group;
-use crate::event::MessageEvent;
-use crate::message::{Message, MessageChain};
+use crate::event::{MessageEvent, MessageEventImpl};
+use crate::message::{MessageChain};
 
-pub struct GroupMessageEvent(pub(crate) MessageEvent);
+pub struct GroupMessageEvent(pub(crate) MessageEventImpl);
 
 impl GroupMessageEvent {
     pub fn subject(&self) -> Group {
