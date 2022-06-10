@@ -1,4 +1,5 @@
 use std::mem;
+
 use miraust_api::bot::Bot;
 use miraust_api::event::Event;
 use miraust_api::event::listener::Listener;
@@ -32,13 +33,14 @@ impl ToMirai for A {
         let listener = Listener::new(|event| {
             match event {
                 Event::GroupMessageEvent(g) => {
+                    if g.message().content() == "testrs" {
+                        let message = g.message();
 
-                    println!("In Rust: {}", g.message().to_string());
+                        g.subject().send_message(&message);
+                    }
                 }
-                _ => {
-                    println!("Any");
-                    println!("Bot: {}", Bot::find_instance(779119352).is_some());
-                }
+                Event::FriendMessageEvent(_) => {}
+                _ => {}
             }
         });
 

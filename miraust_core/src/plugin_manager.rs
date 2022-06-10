@@ -1,7 +1,6 @@
 use jni::JNIEnv;
 use jni::objects::{JClass, JObject};
 
-use crate::event::Event;
 use crate::jni_ffi::jni_callback::MIRAI_ENV;
 
 // 统一事件分发器

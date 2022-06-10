@@ -1,9 +1,6 @@
-use std::sync::mpsc;
-
 use jni::objects::GlobalRef;
 
-use crate::event::MessageEvent;
-use crate::jni_ffi::jni_callback::spawn_call_back;
+use crate::jni_ffi::jni_callback::jni_call_back;
 
 #[no_mangle]
 extern fn message_event_get_subject(event: &GlobalRef) -> *mut GlobalRef {
@@ -15,12 +12,9 @@ extern fn message_event_get_subject(event: &GlobalRef) -> *mut GlobalRef {
 fn message_event_get_subject0(event: &GlobalRef) -> Option<GlobalRef> {
     let global_ref = event.clone();
 
-    let (send, recv) = mpsc::channel();
-    spawn_call_back(move |env| {
-        send.send(unsafe { MessageEvent::get_subject_unchecked(global_ref, env) }).unwrap();
-    });
-
-    recv.recv().unwrap()
+    jni_call_back(move |env| {
+        unsafe { crate::event::message_event::get_subject_unchecked(env, global_ref) }
+    })
 }
 
 #[no_mangle]
@@ -33,10 +27,7 @@ extern fn message_event_get_message(event: &GlobalRef) -> *mut GlobalRef {
 fn message_event_get_message0(event: &GlobalRef) -> Option<GlobalRef> {
     let global_ref = event.clone();
 
-    let (send, recv) = mpsc::channel();
-    spawn_call_back(move |env| {
-        send.send(unsafe { MessageEvent::get_message_unchecked(global_ref, env) }).unwrap();
-    });
-
-    recv.recv().unwrap()
+    jni_call_back(move |env| {
+        unsafe { crate::event::message_event::get_message_unchecked(env, global_ref) }
+    })
 }

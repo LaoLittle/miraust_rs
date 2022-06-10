@@ -1,22 +1,29 @@
-use std::sync::mpsc;
-
 use jni::objects::GlobalRef;
 
-use crate::jni_ffi::jni_callback::spawn_call_back;
-use crate::message::Message;
+use crate::jni_ffi::jni_callback::jni_call_back;
 
 #[no_mangle]
 extern fn message_to_string(message: &GlobalRef) -> String {
-    message_to_string0(message).expect("Cannot get message")
+    message_to_string0(message).expect("Error on Message.toString()")
 }
 
 fn message_to_string0(message: &GlobalRef) -> Option<String> {
     let global_ref = message.clone();
 
-    let (send, recv) = mpsc::channel();
-    spawn_call_back(move |env| {
-        send.send(unsafe { Message::to_string_unchecked(global_ref, env) }).unwrap();
-    });
+    jni_call_back(|env| {
+        unsafe { crate::message::to_string_unchecked(env, global_ref) }
+    })
+}
 
-    recv.recv().unwrap()
+#[no_mangle]
+extern fn message_content_to_string(message: &GlobalRef) -> String {
+    message_content_to_string0(message).expect("Error on Message.contentToString()")
+}
+
+fn message_content_to_string0(message: &GlobalRef) -> Option<String> {
+    let global_ref = message.clone();
+
+    jni_call_back(|env| {
+        unsafe { crate::message::content_to_string_unchecked(env, global_ref) }
+    })
 }

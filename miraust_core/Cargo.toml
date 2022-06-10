@@ -9,15 +9,17 @@ edition = "2021"
 jni = "0"
 libloading = "0"
 #crossbeam = "0"
-tokio = { version = "1", features = ["sync", "rt-multi-thread"] }
 #lazy_static = "1"
+
+[dependencies.tokio]
+version = "1"
+features = ["sync", "rt-multi-thread"]
 
 [lib]
 #path = "src/lib.rs"
 crate-type = ["lib", "cdylib"]
 
 [profile.release]
-panic = "abort"
 lto = true
 debug = false
 opt-level = 3
