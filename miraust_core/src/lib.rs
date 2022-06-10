@@ -1,5 +1,7 @@
 #![feature(once_cell)]
 
+use tokio::task::JoinHandle;
+
 use crate::plugin::RustPlugin;
 
 mod test;
@@ -13,3 +15,5 @@ mod api;
 mod event;
 mod managed;
 mod message;
+
+pub type Listener = JoinHandle<()>;

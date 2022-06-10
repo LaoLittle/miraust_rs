@@ -1,6 +1,4 @@
-use crate::event::{Event, MessageEventImpl};
-use crate::event::friend::FriendMessageEvent;
-use crate::event::group::GroupMessageEvent;
+use crate::event::Event;
 use crate::managed::Managed;
 
 pub struct Listener {
@@ -10,11 +8,11 @@ pub struct Listener {
 impl Listener {
     pub fn new<F: Fn(Event) + Send + 'static>(fun: F) -> Listener {
         let fun = Box::new(move |e: *mut (), t: u8| {
-            let ma = Managed::new(e,0);
+            let ma = Managed::new(e, 0);
             let event_rs = match t {
                 // 1 => Event::MessageEvent(MessageEvent { inner }),
-                1 => Event::GroupMessageEvent(GroupMessageEvent(MessageEventImpl::from_managed(ma))),
-                2 => Event::FriendMessageEvent(FriendMessageEvent(MessageEventImpl::from_managed(ma))),
+                1 => Event::GroupMessageEvent(ma.into()),
+                2 => Event::FriendMessageEvent(ma.into()),
                 _ => Event::Any
             };
 
@@ -25,7 +23,13 @@ impl Listener {
     }
 
     pub fn complete(&self) {
-        unsafe { listener_stop(self.inner.pointer) };
+        unsafe { listener_abort(self.inner.pointer) };
+    }
+}
+
+impl Drop for Listener {
+    fn drop(&mut self) {
+        self.complete();
     }
 }
 
@@ -44,5 +48,5 @@ impl ListenerBuilder {
 extern {
     fn listener_subscribe_always(fun: Box<dyn Fn(*mut (), u8) + Send + 'static>) -> *mut ();
 
-    fn listener_stop(listener: *const ());
+    fn listener_abort(listener: *const ());
 }

@@ -1,10 +1,5 @@
-use tokio::task::JoinHandle;
-
-use crate::event::EventManaged;
 use crate::jni_ffi::jni_callback::{CALLBACK_POOL, MIRAI_ENV};
-use crate::managed::Managed;
-
-type Listener = JoinHandle<()>;
+use crate::Listener;
 
 #[no_mangle]
 extern fn listener_subscribe_always(f: Box<dyn Fn(*mut (), u8) + Send + 'static>) -> *mut Listener {
@@ -16,10 +11,11 @@ extern fn listener_subscribe_always(f: Box<dyn Fn(*mut (), u8) + Send + 'static>
             f(Box::into_raw(Box::new(event.0)) as *mut (), event.1);
         }
     });
+
     Box::into_raw(Box::new(handle))
 }
 
 #[no_mangle]
-extern fn listener_stop(handle: &Listener) {
+extern fn listener_abort(handle: &Listener) {
     handle.abort();
 }
