@@ -1,3 +1,4 @@
+#[repr(C)]
 pub struct RustPluginFunc {
     description_fun: fn() -> RustPluginDescription,
     on_enable_fun: fn(),
