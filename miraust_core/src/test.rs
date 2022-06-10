@@ -1,9 +1,9 @@
 #[cfg(test)]
 mod tests {
-    use std::io::repeat;
     use std::sync::{Arc, mpsc};
     use std::thread;
     use std::thread::JoinHandle;
+
     use tokio::runtime::Runtime;
     use tokio::task::yield_now;
 
@@ -132,7 +132,6 @@ mod tests {
             loop {
                 rt0.spawn(async {
                     println!("Hello0!");
-
                 });
             }
         });
@@ -147,7 +146,6 @@ mod tests {
         });
 
         rt.block_on(async {
-
             println!("12");
         });
 
