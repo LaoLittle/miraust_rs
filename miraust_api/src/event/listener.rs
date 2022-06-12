@@ -17,7 +17,6 @@ impl Listener {
                 _ => Event::Any
             };
 
-
             fun(event_rs);
         });
 

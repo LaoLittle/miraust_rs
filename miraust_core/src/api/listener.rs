@@ -3,7 +3,7 @@ use crate::Listener;
 
 #[no_mangle]
 extern fn listener_subscribe_always(f: Box<dyn Fn(*mut (), u8) + Send + 'static>) -> *mut Listener {
-    let runtime = CALLBACK_POOL.get().unwrap();
+    let runtime = CALLBACK_POOL.get().unwrap().listener_pool();
     let mut r = MIRAI_ENV.get().unwrap().sender.subscribe();
 
     let handle = runtime.spawn(async move {

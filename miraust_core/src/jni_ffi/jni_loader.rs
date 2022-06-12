@@ -3,7 +3,7 @@ use std::ffi::c_void;
 use jni::{JavaVM, JNIEnv, NativeMethod};
 use jni::sys::{jint, JNI_ERR};
 
-use crate::jni_ffi::jni_callback::{CALLBACK_POOL, MIRAI_ENV, MiraiEnv};
+use crate::jni_ffi::jni_callback::{CALLBACK_POOL, CallBackRuntime, MIRAI_ENV, MiraiEnv};
 use crate::plugin_loader::*;
 use crate::plugin_manager::broadcast;
 
@@ -46,7 +46,7 @@ extern "C" fn JNI_OnLoad(jvm: JavaVM, _reserved: *mut c_void) -> jint {
 
     set_callback(jvm);
 
-    let runtime = tokio::runtime::Builder::new_multi_thread()
+    let call_back = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(16)
         .on_thread_start(|| {
             let jvm = MIRAI_ENV.get().unwrap().jvm;
@@ -54,7 +54,10 @@ extern "C" fn JNI_OnLoad(jvm: JavaVM, _reserved: *mut c_void) -> jint {
         })
         .build().unwrap();
 
-    if CALLBACK_POOL.set(runtime).is_err() { status = JNI_ERR };
+    let listener = tokio::runtime::Builder::new_multi_thread()
+        .build().unwrap();
+
+    if CALLBACK_POOL.set(CallBackRuntime::new(call_back, listener)).is_err() { status = JNI_ERR };
 
     status
 }
