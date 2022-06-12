@@ -1,8 +1,10 @@
+use std::any::Any;
 use std::mem;
 
 use miraust_api::bot::Bot;
 use miraust_api::event::Event;
 use miraust_api::event::listener::Listener;
+use miraust_api::message::chain::MessageChain;
 use miraust_api::plugin::{RustPluginDescription, RustPluginFunc, ToMirai};
 
 #[no_mangle]
@@ -33,10 +35,19 @@ impl ToMirai for A {
         let listener = Listener::new(|event| {
             match event {
                 Event::GroupMessageEvent(g) => {
-                    if g.message().content() == "testrs" {
-                        let message = g.message();
+                    let m = g.message();
 
-                        g.subject().send_message(&message);
+                    let bb: &dyn Any = &m;
+
+                    if m.content() == "testrs" {
+                        let chain = MessageChain::builder()
+                            .add("嘻嘻")
+                            .add("\nTesting")
+                            .build();
+
+                        println!("ok!");
+
+                        g.subject().send_message(&chain);
                     }
                 }
                 Event::FriendMessageEvent(_) => {}

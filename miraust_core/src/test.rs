@@ -3,7 +3,9 @@ mod tests {
     use std::sync::{Arc, mpsc};
     use std::thread;
     use std::thread::JoinHandle;
+    use std::time::Duration;
 
+    use tokio::runtime;
     use tokio::runtime::Runtime;
     use tokio::task::yield_now;
 
@@ -173,5 +175,14 @@ mod tests {
 
         start(&rt);
         handle.join().unwrap();
+    }
+
+    #[test]
+    fn spawn() {
+        let rt = runtime::Builder::new_multi_thread().build().unwrap();
+
+        rt.block_on(async {
+            thread::sleep(Duration::from_secs(5))
+        });
     }
 }
