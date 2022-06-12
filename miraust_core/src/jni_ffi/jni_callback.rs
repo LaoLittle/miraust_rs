@@ -33,7 +33,7 @@ pub(crate) fn spawn_call_back<F>(fun: F)
     let runtime = CALLBACK_POOL.get().unwrap();
     let mirai = MIRAI_ENV.get().unwrap();
 
-    runtime.spawn_blocking(|| {
+    runtime.block_on(async {
         let env = mirai.jvm.get_env().unwrap();
         fun(env);
     });
