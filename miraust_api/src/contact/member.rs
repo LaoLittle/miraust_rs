@@ -1,6 +1,16 @@
+use std::ops::Deref;
+
 use crate::contact::Contact;
 
 pub struct Member(Contact);
+
+impl Deref for Member {
+    type Target = Contact;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
 
 pub struct NormalMember(Member);
 

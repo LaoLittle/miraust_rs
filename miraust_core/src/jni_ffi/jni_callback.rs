@@ -3,11 +3,9 @@ use std::sync::mpsc;
 
 use jni::{JavaVM, JNIEnv};
 use jni::objects::{GlobalRef, JMethodID, JStaticMethodID};
-use tokio::task::JoinHandle;
 
 pub(crate) static MIRAI_ENV: SyncOnceCell<MiraiEnv> = SyncOnceCell::new();
 pub(crate) static CALLBACK_POOL: SyncOnceCell<tokio::runtime::Runtime> = SyncOnceCell::new();
-
 
 pub(crate) struct MiraiEnv {
     pub(crate) jvm: &'static JavaVM,
@@ -20,19 +18,25 @@ pub(crate) struct MiraiEnv {
     pub(crate) message_event_get_message: JMethodID<'static>,
     pub(crate) message_to_string: JMethodID<'static>,
     pub(crate) message_content_to_string: JMethodID<'static>,
+    pub(crate) plain_text_class: GlobalRef,
+    pub(crate) new_plain_text: JMethodID<'static>,
     pub(crate) contact_send_message: JMethodID<'static>,
+    pub(crate) message_chain_builder_class: GlobalRef,
+    pub(crate) new_message_chain_builder: JMethodID<'static>,
+    pub(crate) message_chain_builder_add: JMethodID<'static>,
+    pub(crate) message_chain_builder_as_message_chain: JMethodID<'static>,
 }
 
-pub(crate) fn spawn_call_back<F>(fun: F) -> JoinHandle<()>
+pub(crate) fn spawn_call_back<F>(fun: F)
     where F: FnOnce(JNIEnv) + Send + 'static
 {
     let runtime = CALLBACK_POOL.get().unwrap();
     let mirai = MIRAI_ENV.get().unwrap();
 
-    runtime.spawn_blocking(move || {
+    runtime.spawn_blocking(|| {
         let env = mirai.jvm.get_env().unwrap();
         fun(env);
-    })
+    });
 }
 
 pub(crate) fn jni_call_back<F, T>(fun: F) -> Option<T>

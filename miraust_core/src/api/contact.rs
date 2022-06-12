@@ -4,7 +4,7 @@ use crate::jni_ffi::jni_callback::jni_call_back;
 
 #[no_mangle]
 extern fn contact_send_message(contact: &GlobalRef, message: &GlobalRef) -> *mut GlobalRef {
-    let g = contact_send_message0(contact, message).expect("");
+    let g = contact_send_message0(contact, message).expect("Cannot send message");
 
     Box::into_raw(Box::new(g))
 }

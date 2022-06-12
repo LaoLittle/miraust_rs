@@ -4,11 +4,14 @@ use jni::signature::JavaType;
 
 use crate::jni_ffi::jni_callback::MIRAI_ENV;
 
-pub unsafe fn to_string_unchecked(env: JNIEnv, global_ref: GlobalRef) -> Option<String> {
+pub mod chain;
+pub mod single;
+
+pub unsafe fn to_string_unchecked(env: JNIEnv, message: GlobalRef) -> Option<String> {
     let mirai = MIRAI_ENV.get()?;
 
     if let Ok(value) = env.call_method_unchecked(
-        global_ref.as_obj(),
+        message.as_obj(),
         mirai.message_to_string,
         JavaType::Object("java/lang/String".to_string()),
         &[],
@@ -23,13 +26,13 @@ pub unsafe fn to_string_unchecked(env: JNIEnv, global_ref: GlobalRef) -> Option<
     }
 }
 
-pub unsafe fn content_to_string_unchecked(env: JNIEnv, global_ref: GlobalRef) -> Option<String> {
+pub unsafe fn content_to_string_unchecked(env: JNIEnv, message: GlobalRef) -> Option<String> {
     let mirai = MIRAI_ENV.get()?;
 
     if let Ok(value) = env.call_method_unchecked(
-        global_ref.as_obj(),
+        message.as_obj(),
         mirai.message_content_to_string,
-        JavaType::Object("java/lang/String".to_string()),
+        JavaType::Object(String::new() /*"java/lang/String".to_string()*/),
         &[],
     ) {
         let obj = value.l().ok()?;

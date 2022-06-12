@@ -1,21 +1,21 @@
-use std::ops::Deref;
-
+use crate::{RawPointer, RawString};
 use crate::managed::Managed;
+use crate::message::chain::MessageChain;
 
-mod builder;
-mod single;
+pub mod chain;
+pub mod single;
 
 pub struct Message(pub(crate) Managed);
 
 impl Message {
     pub fn content(&self) -> String {
-        unsafe { message_content_to_string(self.0.pointer) }
+        unsafe { message_content_to_string(self.0.pointer).into() }
     }
 }
 
 impl ToString for Message {
     fn to_string(&self) -> String {
-        unsafe { message_to_string(self.0.pointer) }
+        unsafe { message_to_string(self.0.pointer).into() }
     }
 }
 
@@ -25,27 +25,15 @@ impl From<MessageChain> for Message {
     }
 }
 
-pub struct MessageChain {
-    pub(crate) inner: Message,
-}
-
-impl Deref for MessageChain {
-    type Target = Message;
-
-    fn deref(&self) -> &Self::Target {
-        &self.inner
-    }
-}
-
-impl ToString for MessageChain {
-    fn to_string(&self) -> String {
-        self.inner.to_string()
+impl From<Managed> for Message {
+    fn from(m: Managed) -> Self {
+        Self(m)
     }
 }
 
 #[link(name = "miraust_core")]
 extern {
-    fn message_to_string(message: *const ()) -> String;
+    fn message_to_string(message: RawPointer) -> RawString;
 
-    fn message_content_to_string(message: *const ()) -> String;
+    fn message_content_to_string(message: RawPointer) -> RawString;
 }
