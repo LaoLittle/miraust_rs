@@ -6,7 +6,7 @@ use jni::objects::{JObject, JString};
 use jni::sys::{jobjectArray, jsize};
 use libloading::Library;
 
-use crate::plugin::RustPluginFunc;
+use crate::plugin::RustPluginInterface;
 use crate::RustPlugin;
 
 pub(crate) extern "C" fn load_plugin(
@@ -21,9 +21,9 @@ pub(crate) extern "C" fn load_plugin(
     let lib = unsafe { Library::new(path) };
     match lib {
         Ok(lib) => {
-            let fun_on_load = unsafe { lib.get::<fn() -> RustPluginFunc>(b"on_load").unwrap() };
+            let fun_on_load = unsafe { lib.get::<fn() -> RustPluginInterface>(b"on_load").unwrap() };
 
-            let func: RustPluginFunc = fun_on_load();
+            let func: RustPluginInterface = fun_on_load();
             let plugin_instance = RustPlugin::new(lib, func);
 
             let plugin_box = Box::new(plugin_instance);
@@ -40,8 +40,21 @@ pub(crate) extern "C" fn load_plugin(
     }
 }
 
+pub(crate) extern "C" fn enable_plugin(_env: JNIEnv, _obj: JObject, plugin: &RustPlugin) {
+    //let plugin = unsafe { &*plugin };
+
+    plugin.enable();
+}
+
+pub(crate) extern "C" fn disable_plugin(_env: JNIEnv, _obj: JObject, plugin: &RustPlugin) {
+    //let plugin = unsafe { &*plugin };
+
+    plugin.disable();
+}
+
 pub(crate) extern "C" fn unload_plugin(_env: JNIEnv, _obj: JObject, plugin: *mut RustPlugin) {
-    unsafe { Box::from_raw(plugin) };
+    let mut p = unsafe { Box::from_raw(plugin) };
+    p.unload();
 }
 
 pub(crate) extern "C" fn get_plugin_description(
@@ -78,16 +91,4 @@ pub(crate) extern "C" fn get_plugin_description(
     }
 
     string_array
-}
-
-pub(crate) extern "C" fn enable_plugin(_env: JNIEnv, _obj: JObject, plugin: &RustPlugin) {
-    //let plugin = unsafe { &*plugin };
-
-    plugin.enable();
-}
-
-pub(crate) extern "C" fn disable_plugin(_env: JNIEnv, _obj: JObject, plugin: &RustPlugin) {
-    //let plugin = unsafe { &*plugin };
-
-    plugin.disable();
 }

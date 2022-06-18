@@ -1,20 +1,25 @@
-use std::any::Any;
+use std::cell::RefCell;
 use std::mem;
 
 use miraust_api::bot::Bot;
 use miraust_api::event::Event;
 use miraust_api::event::listener::Listener;
 use miraust_api::message::chain::MessageChain;
-use miraust_api::plugin::{RustPluginDescription, RustPluginFunc, ToMirai};
+use miraust_api::plugin::{RustPluginDescription, RustPluginInterface, Plugin};
 
 #[no_mangle]
-fn on_load() -> RustPluginFunc {
-    A.register()
+extern fn on_load() -> RustPluginInterface {
+    MyPlugin {
+        listener: RefCell::new(None)
+    }.into()
 }
 
-struct A;
+struct MyPlugin {
+    listener: RefCell<Option<Listener>>,
+}
 
-impl ToMirai for A {
+impl Plugin for MyPlugin {
+    // 插件描述
     fn description() -> RustPluginDescription {
         RustPluginDescription {
             author: None,
@@ -24,20 +29,20 @@ impl ToMirai for A {
         }
     }
 
-    fn on_enable() {
+    // 插件启用阶段被调用，可能调用多次（插件重复启动禁用），但并不会重置插件实例
+    fn on_enable(&self) {
         println!("enabled!");
         for _ in 0..2 {
             let b = Bot::find_instance(1312);
             println!("{}", b.is_none());
         }
 
-
+        // listener 被`drop`会自动停止监听，
+        // 也可以通过`listener.complete()`主动停止监听
         let listener = Listener::new(|event| {
             match event {
                 Event::GroupMessageEvent(g) => {
                     let m = g.message();
-
-                    let bb: &dyn Any = &m;
 
                     if m.content() == "testrs" {
                         let chain = MessageChain::builder()
@@ -55,7 +60,13 @@ impl ToMirai for A {
             }
         });
 
-        mem::forget(listener);
-        //println!("{:?}", std::env::current_dir().unwrap());
+        let mut r = self.listener.borrow_mut();
+        *r = Some(listener);
+    }
+}
+
+impl Drop for MyPlugin {
+    fn drop(&mut self) {
+        println!("Dropping");
     }
 }
