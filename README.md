@@ -65,9 +65,15 @@ impl Plugin for MyPlugin {
     }
 }
 
+// 插件卸载前会先`drop`插件实例
 impl Drop for MyPlugin {
     fn drop(&mut self) {
         println!("Dropping");
     }
 }
 ```
+
+# 插件的生命周期
+core通过`on_load`函数获取插件实例和函数表，然后调用`Plugin::on_enable`启用插件
+
+插件在卸载前会先`drop`插件实例，然后释放库资源
