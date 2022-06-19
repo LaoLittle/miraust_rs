@@ -1,5 +1,7 @@
 #![feature(vec_into_raw_parts)]
 
+use std::ptr::null_mut;
+
 pub mod bot;
 pub mod contact;
 pub mod plugin;
@@ -15,6 +17,16 @@ pub struct RawString {
     pointer: *mut u8,
     length: usize,
     capacity: usize,
+}
+
+impl RawString {
+    pub const fn null() -> RawString {
+        Self {
+            pointer: null_mut(),
+            length: 0,
+            capacity: 0,
+        }
+    }
 }
 
 impl From<String> for RawString {

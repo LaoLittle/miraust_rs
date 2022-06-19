@@ -6,8 +6,17 @@ pub struct Listener {
     inner: Managed,
 }
 
+#[repr(C)]
+struct ListenerInvoke {
+    fun: *mut (),
+    invoke: fn(*const ()),
+    drop: fn(*mut ()),
+}
+
 impl Listener {
-    pub fn new<F: Fn(Event) + Send + 'static>(fun: F) -> Listener {
+    pub fn new<F>(fun: F) -> Listener
+        where F: Fn(Event) + Send + 'static
+    {
         let fun = Box::new(move |e: RawPointerMut, t: u8| {
             let ma = Managed::new(e, 0);
             let event_rs = match t {
@@ -34,32 +43,6 @@ impl Drop for Listener {
         self.complete();
     }
 }
-
-/*pub struct ListenerBuilder {
-    listener: Listener,
-
-}
-
-impl ListenerBuilder {
-    pub fn build(self) {
-
-    }
-}
-*/
-
-/*trait Invoke {
-    unsafe fn invoke(fun: *mut (), val: *mut (), t: u8);
-}
-
-impl<F> Invoke for F
-    where F: Fn(*mut (), u8) + Send + 'static
-
-{
-    unsafe fn invoke(fun: *mut (), val: *mut (), t: u8) {
-        (*(fun as *mut F))(val, t)
-    }
-}*/
-
 
 #[link(name = "miraust_core")]
 extern {

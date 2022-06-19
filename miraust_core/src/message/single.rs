@@ -10,7 +10,7 @@ pub mod plain_text {
     pub fn new_unchecked(env: JNIEnv, content: RawString) -> jni::errors::Result<GlobalRef> {
         let mirai = MIRAI_ENV.get().unwrap();
 
-        let content = String::from(content);
+        let content = content.string().expect("can't be none");
 
         let jstr = env.new_string(&content)?;
 

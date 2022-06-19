@@ -1,5 +1,7 @@
 use std::mem;
 
+use crate::RawString;
+
 impl<P: Plugin> From<P> for RustPluginInterface {
     fn from(plugin: P) -> Self {
         let (description_fun,
@@ -13,7 +15,7 @@ impl<P: Plugin> From<P> for RustPluginInterface {
             description_fun,
             on_enable_fun,
             on_disable_fun,
-            plugin_unload_fun
+            plugin_unload_fun,
         }
     }
 }
@@ -21,19 +23,41 @@ impl<P: Plugin> From<P> for RustPluginInterface {
 #[repr(C)]
 pub struct RustPluginInterface {
     instance: *mut (),
-    description_fun: extern fn() -> RustPluginDescription,
-    on_enable_fun: fn(*const ()),
-    on_disable_fun: fn(*const ()),
-    plugin_unload_fun: fn(*mut ()),
+    description_fun: extern fn() -> RustPluginDescFFI,
+    on_enable_fun: extern fn(*const ()),
+    on_disable_fun: extern fn(*const ()),
+    plugin_unload_fun: extern fn(*mut ()),
 }
 
 #[derive(Debug)]
-#[repr(C)] // fix later: use RawString
 pub struct RustPluginDescription {
     pub author: Option<String>,
     pub id: String,
     pub name: Option<String>,
     pub version: String,
+}
+
+#[repr(C)]
+struct RustPluginDescFFI {
+    author: RawString,
+    id: RawString,
+    name: RawString,
+    version: RawString,
+}
+
+impl From<RustPluginDescription> for RustPluginDescFFI {
+    fn from(desc: RustPluginDescription) -> Self {
+        Self {
+            author: if let Some(s) = desc.author {
+                s.into()
+            } else { RawString::null() },
+            id: desc.id.into(),
+            name: if let Some(s) = desc.name {
+                s.into()
+            } else { RawString::null() },
+            version: desc.version.into(),
+        }
+    }
 }
 
 impl RustPluginDescription {
@@ -61,12 +85,12 @@ pub trait Plugin {
     }
 }
 
-type PlugFunc = (extern fn() -> RustPluginDescription, fn(*const ()), fn(*const ()), fn(*mut ()));
+type PlugFunc = (extern fn() -> RustPluginDescFFI, extern fn(*const ()), extern fn(*const ()), extern fn(*mut ()));
 
 fn plugin_interface<P: Plugin>() -> PlugFunc {
     let description_fun = plugin_description::<P>;
-    let on_enable_fun = unsafe { mem::transmute::<_, fn(*const ())>(P::on_enable as fn(_)) };
-    let on_disable_fun = unsafe { mem::transmute::<_, fn(*const ())>(P::on_disable as fn(_)) };
+    let on_enable_fun = unsafe { mem::transmute::<_, extern fn(*const ())>(P::on_enable as fn(_)) };
+    let on_disable_fun = unsafe { mem::transmute::<_, extern fn(*const ())>(P::on_disable as fn(_)) };
     let plugin_unload_fun = plugin_unload::<P>;
 
     (description_fun,
@@ -75,10 +99,11 @@ fn plugin_interface<P: Plugin>() -> PlugFunc {
      plugin_unload_fun)
 }
 
-fn plugin_unload<P: Plugin>(instance: *mut ()) {
+extern fn plugin_unload<P: Plugin>(instance: *mut ()) {
     unsafe { Box::<P>::from_raw(instance as _) };
 }
 
-extern fn plugin_description<P: Plugin>() -> RustPluginDescription {
-    P::description()
+extern fn plugin_description<P: Plugin>() -> RustPluginDescFFI {
+    let desc = P::description();
+    desc.into()
 }

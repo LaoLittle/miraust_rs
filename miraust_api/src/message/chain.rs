@@ -12,6 +12,10 @@ impl MessageChain {
     pub fn builder() -> MessageChainBuilder {
         MessageChainBuilder::new()
     }
+
+    pub fn iter(&self) -> MessageChainIter {
+        MessageChainIter { chain: self }
+    }
 }
 
 impl Deref for MessageChain {
@@ -31,6 +35,18 @@ impl ToString for MessageChain {
 impl From<Managed> for MessageChain {
     fn from(m: Managed) -> Self {
         Self { inner: m.into() }
+    }
+}
+
+pub struct MessageChainIter<'a> {
+    chain: &'a MessageChain,
+}
+
+impl<'a> Iterator for MessageChainIter<'a> {
+    type Item = &'a MessageChain;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        todo!()
     }
 }
 

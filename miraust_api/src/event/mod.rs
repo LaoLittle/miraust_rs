@@ -3,8 +3,8 @@ use crate::contact::Contact;
 use crate::event::friend::FriendMessageEvent;
 use crate::event::group::GroupMessageEvent;
 use crate::managed::Managed;
-use crate::message::Message;
 use crate::message::chain::MessageChain;
+use crate::message::Message;
 
 pub mod listener;
 pub mod group;

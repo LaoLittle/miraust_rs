@@ -1,11 +1,10 @@
 use std::cell::RefCell;
-use std::mem;
 
 use miraust_api::bot::Bot;
 use miraust_api::event::Event;
 use miraust_api::event::listener::Listener;
 use miraust_api::message::chain::MessageChain;
-use miraust_api::plugin::{RustPluginDescription, RustPluginInterface, Plugin};
+use miraust_api::plugin::{Plugin, RustPluginDescription, RustPluginInterface};
 
 #[no_mangle]
 extern fn on_load() -> RustPluginInterface {

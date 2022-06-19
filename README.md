@@ -1,10 +1,13 @@
 # Miraust
+
 Mirai Rust Interface
 
 # 自主构建
+
 clone 本项目，在项目根目录执行`cargo b --package miraust_core`进行构建
 
 # 插件开发示例
+
 ```rust
 #[no_mangle]
 extern fn on_load() -> RustPluginInterface { // 插件被加载时调用进行初始化，在插件被卸载前不会再次调用
@@ -74,6 +77,7 @@ impl Drop for MyPlugin {
 ```
 
 # 插件的生命周期
+
 core通过`on_load`函数获取插件实例和函数表，然后调用`Plugin::on_enable`启用插件
 
 插件在卸载前会先`drop`插件实例，然后释放库资源

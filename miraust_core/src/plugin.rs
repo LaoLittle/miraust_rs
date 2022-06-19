@@ -2,6 +2,8 @@ use std::marker::PhantomPinned;
 
 use libloading::Library;
 
+use crate::RawString;
+
 pub struct RustPlugin {
     _lib: Library,
     interface: RustPluginInterface,
@@ -21,10 +23,10 @@ impl RustPlugin {
 #[repr(C)]
 pub struct RustPluginInterface {
     instance: *mut (),
-    description_fun: fn() -> RustPluginDescription,
-    on_enable_fun: fn(*const ()),
-    on_disable_fun: fn(*const ()),
-    plugin_unload_fun: fn(*mut ()),
+    description_fun: extern fn() -> RustPluginDescription,
+    on_enable_fun: extern fn(*const ()),
+    on_disable_fun: extern fn(*const ()),
+    plugin_unload_fun: extern fn(*mut ()),
 }
 
 impl RustPlugin {
@@ -57,11 +59,37 @@ impl RustPlugin {
     }
 }
 
-#[derive(Debug)]
 #[repr(C)]
 pub struct RustPluginDescription {
-    pub author: Option<String>,
-    pub id: String,
-    pub name: Option<String>,
-    pub version: String,
+    author: RawString,
+    id: RawString,
+    name: RawString,
+    version: RawString,
+}
+
+impl RustPluginDescription {
+    pub fn author(&self) -> &str {
+        self.author.get_str().unwrap_or("")
+    }
+
+    pub fn id(&self) -> &str {
+        self.id.get_str().unwrap_or("")
+    }
+
+    pub fn name(&self) -> &str {
+        self.name.get_str().unwrap_or_else(|| self.id())
+    }
+
+    pub fn version(&self) -> &str {
+        self.version.get_str().unwrap_or("0.0.1")
+    }
+}
+
+impl Drop for RustPluginDescription {
+    fn drop(&mut self) {
+        let _ = self.author.string();
+        let _ = self.id.string();
+        let _ = self.name.string();
+        let _ = self.version.string();
+    }
 }

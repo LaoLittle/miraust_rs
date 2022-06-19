@@ -10,18 +10,6 @@ mod tests {
     use tokio::task::yield_now;
 
     #[test]
-    fn lib_load() {
-        use crate::plugin::RustPluginFunc;
-        let lib = unsafe { libloading::Library::new("target/debug/libjni_test.so").unwrap() };
-
-        let f = unsafe {
-            lib.get::<fn() -> RustPluginFunc>(b"on_load").unwrap()
-        };
-
-        let _func: RustPluginFunc = f();
-    }
-
-    #[test]
     fn vec() {
         let mut a = vec![Box::new(1)];
 

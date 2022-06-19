@@ -30,7 +30,7 @@ pub(crate) struct MiraiEnv {
 
 pub(crate) struct CallBackRuntime {
     call_back_pool: Runtime,
-    listener_pool: Runtime
+    listener_pool: Runtime,
 }
 
 impl CallBackRuntime {

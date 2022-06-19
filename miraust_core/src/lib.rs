@@ -1,6 +1,8 @@
 #![feature(once_cell)]
 #![feature(vec_into_raw_parts)]
 
+use std::slice;
+
 use tokio::task::JoinHandle;
 
 use crate::plugin::RustPlugin;
@@ -27,6 +29,29 @@ pub struct RawString {
     capacity: usize,
 }
 
+impl RawString {
+    pub fn is_null(&self) -> bool {
+        self.pointer.is_null()
+    }
+
+    pub fn get_str(&self) -> Option<&str> {
+        if self.is_null() { return None; }
+
+        let str = unsafe {
+            let bytes: &[u8] = slice::from_raw_parts(self.pointer, self.length);
+            std::str::from_utf8_unchecked(bytes)
+        };
+
+        Some(str)
+    }
+
+    pub fn string(self) -> Option<String> {
+        if self.is_null() { return None; }
+        let s = unsafe { String::from_raw_parts(self.pointer, self.length, self.capacity) };
+        Some(s)
+    }
+}
+
 unsafe impl Send for RawString {}
 
 impl From<(*mut u8, usize, usize)> for RawString {
@@ -45,8 +70,8 @@ impl From<String> for RawString {
     }
 }
 
-impl From<RawString> for String {
-    fn from(raw: RawString) -> Self {
-        unsafe { String::from_raw_parts(raw.pointer, raw.length, raw.capacity) }
+impl AsRef<str> for RawString {
+    fn as_ref(&self) -> &str {
+        self.get_str().unwrap()
     }
 }

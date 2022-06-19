@@ -8,6 +8,7 @@ pub enum SingleMessage {
     PlainText(imp::PlainText),
     Image(imp::Image),
     At(u64),
+    Unsupported,
 }
 
 impl SingleMessage {
@@ -20,7 +21,8 @@ impl SingleMessage {
         match self {
             SingleMessage::PlainText(p) => p.0.pointer,
             SingleMessage::Image(i) => i.0.pointer,
-            SingleMessage::At(_) => todo!()
+            SingleMessage::At(_) => todo!(),
+            _ => todo!()
         }
     }
 }

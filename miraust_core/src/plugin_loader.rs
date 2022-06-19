@@ -69,19 +69,11 @@ pub(crate) extern "C" fn get_plugin_description(
         .unwrap();
 
     let desc = plugin.description();
-    let id = desc.id.as_str();
-    let name = if let Some(ref name) = desc.name {
-        name.as_str()
-    } else {
-        id
-    };
+    let id = desc.id();
+    let name = desc.name();
 
-    let author = if let Some(ref author) = desc.author {
-        author.as_str()
-    } else {
-        ""
-    };
-    let version = desc.version.as_str();
+    let author = desc.author();
+    let version = desc.version();
 
     {
         for (i, s) in [id, name, author, version].into_iter().enumerate() {
