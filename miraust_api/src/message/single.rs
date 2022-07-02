@@ -6,22 +6,27 @@ use crate::RawPointerMut;
 
 pub enum SingleMessage {
     PlainText(imp::PlainText),
+    At,
+    AtAll,
     Image(imp::Image),
-    At(u64),
-    Unsupported,
+    RichMessage,
+    //ServiceMessage,
+    Face,
+    ForwardMessage,
+    Audio,
+    MarketFace,
+    MusicShare,
 }
 
 impl SingleMessage {
     pub fn at(id: u64) -> Self {
-        SingleMessage::At(id)
+        SingleMessage::At
     }
-
 
     pub(crate) fn inner_pointer(&self) -> RawPointerMut {
         match self {
             SingleMessage::PlainText(p) => p.0.pointer,
             SingleMessage::Image(i) => i.0.pointer,
-            SingleMessage::At(_) => todo!(),
             _ => todo!()
         }
     }
@@ -47,13 +52,13 @@ impl From<String> for SingleMessage {
 
 impl From<Member> for SingleMessage {
     fn from(m: Member) -> Self {
-        Self::At(m.id())
+        Self::At
     }
 }
 
 impl From<u64> for SingleMessage {
     fn from(id: u64) -> Self {
-        Self::At(id)
+        Self::At
     }
 }
 

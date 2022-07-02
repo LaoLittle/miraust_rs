@@ -64,7 +64,7 @@ impl Plugin for MyPlugin {
     }
 }
 
-// 插件卸载前会先`drop`插件实例
+// 插件卸载后会`drop`插件实例
 impl Drop for MyPlugin {
     fn drop(&mut self) {
         println!("Dropping");

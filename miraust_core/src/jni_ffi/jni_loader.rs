@@ -116,6 +116,7 @@ fn set_callback(jvm: JavaVM) {
 
         let new_plain_text = env.get_method_id(plain_text_class, "<init>", "(Ljava/lang/String;)V")?;
 
+        let plain_text_class = env.new_global_ref(plain_text_class)?;
         // contact
         let contact_class = env.find_class("net/mamoe/mirai/contact/Contact")?;
 
@@ -128,9 +129,21 @@ fn set_callback(jvm: JavaVM) {
         let message_chain_builder_add = env.get_method_id(message_chain_builder_class, "add", "(Lnet/mamoe/mirai/message/data/Message;)Z")?;
         let message_chain_builder_as_message_chain = env.get_method_id(message_chain_builder_class, "asMessageChain", "()Lnet/mamoe/mirai/message/data/MessageChain;")?;
 
-
-        let plain_text_class = env.new_global_ref(plain_text_class)?;
         let message_chain_builder_class = env.new_global_ref(message_chain_builder_class)?;
+
+        // iterator
+        let chain_iterator_class = env.find_class("org/laolittle/bridge/MessageChainIterator")?;
+        let chain_iterator_get_iterator = env.get_static_method_id(chain_iterator_class, "getIterator", "(Lnet/mamoe/mirai/message/data/MessageChain;)Lorg/laolittle/bridge/MessageChainIterator;")?;
+        let chain_iterator_has_next = env.get_method_id(chain_iterator_class, "hasNext", "()Z")?;
+        let chain_iterator_next = env.get_method_id(chain_iterator_class, "next", "()Lnet/mamoe/mirai/message/data/SingleMessage;")?;
+
+        let chain_iterator_class = env.new_global_ref(chain_iterator_class)?;
+
+        // message bridge
+        let message_bridge_class = env.find_class("org/laolittle/bridge/MessageBridge")?;
+        let single_type = env.get_static_method_id(message_bridge_class, "type", "(Lnet/mamoe/mirai/message/data/SingleMessage;)B")?;
+
+        let message_bridge_class = env.new_global_ref(message_bridge_class)?;
 
         if MIRAI_ENV.set(MiraiEnv {
             jvm,
@@ -150,6 +163,12 @@ fn set_callback(jvm: JavaVM) {
             new_message_chain_builder,
             message_chain_builder_add,
             message_chain_builder_as_message_chain,
+            chain_iterator_class,
+            chain_iterator_get_iterator,
+            chain_iterator_has_next,
+            chain_iterator_next,
+            message_bridge_class,
+            single_type,
         }).is_err() {
             env.throw_new("java/lang/RuntimeException", "Unable to set mirai_env")?;
         };

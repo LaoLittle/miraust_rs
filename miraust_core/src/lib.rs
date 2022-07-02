@@ -1,5 +1,6 @@
-#![feature(once_cell)]
 #![feature(vec_into_raw_parts)]
+#![feature(once_cell)]
+
 
 use std::slice;
 

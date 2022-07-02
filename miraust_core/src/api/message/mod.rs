@@ -3,6 +3,8 @@ use jni::objects::GlobalRef;
 use crate::jni_ffi::jni_callback::jni_call_back;
 use crate::RawString;
 
+mod chain;
+
 #[no_mangle]
 extern fn message_to_string(message: &GlobalRef) -> RawString {
     message_to_string0(message).expect("Error on Message.toString()").into_raw_parts().into()

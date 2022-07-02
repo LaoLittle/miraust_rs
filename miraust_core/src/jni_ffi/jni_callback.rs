@@ -1,12 +1,11 @@
-use std::lazy::SyncOnceCell;
-use std::sync::mpsc;
+use std::sync::{mpsc, OnceLock};
 
 use jni::{JavaVM, JNIEnv};
 use jni::objects::{GlobalRef, JMethodID, JStaticMethodID};
 use tokio::runtime::Runtime;
 
-pub(crate) static MIRAI_ENV: SyncOnceCell<MiraiEnv> = SyncOnceCell::new();
-pub(crate) static CALLBACK_POOL: SyncOnceCell<CallBackRuntime> = SyncOnceCell::new();
+pub(crate) static MIRAI_ENV: OnceLock<MiraiEnv> = OnceLock::new();
+pub(crate) static CALLBACK_POOL: OnceLock<CallBackRuntime> = OnceLock::new();
 
 pub(crate) struct MiraiEnv {
     pub(crate) jvm: &'static JavaVM,
@@ -26,6 +25,12 @@ pub(crate) struct MiraiEnv {
     pub(crate) new_message_chain_builder: JMethodID<'static>,
     pub(crate) message_chain_builder_add: JMethodID<'static>,
     pub(crate) message_chain_builder_as_message_chain: JMethodID<'static>,
+    pub(crate) chain_iterator_class: GlobalRef,
+    pub(crate) chain_iterator_get_iterator: JStaticMethodID<'static>,
+    pub(crate) chain_iterator_has_next: JMethodID<'static>,
+    pub(crate) chain_iterator_next: JMethodID<'static>,
+    pub(crate) message_bridge_class: GlobalRef,
+    pub(crate) single_type: JStaticMethodID<'static>,
 }
 
 pub(crate) struct CallBackRuntime {
