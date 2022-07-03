@@ -34,11 +34,7 @@ impl Plugin for MyPlugin {
 
     // 插件启用阶段被调用，可能调用多次（插件重复启动禁用），但并不会重置插件实例
     fn on_enable(&self) {
-        println!("enabled!");
-        for _ in 0..2 {
-            let b = Bot::find_instance(1312);
-            println!("{}", b.is_none());
-        }
+        let b = Bot::find_instance(1312);
 
         // listener 被`drop`会自动停止监听，
         // 也可以通过`listener.complete()`主动停止监听
