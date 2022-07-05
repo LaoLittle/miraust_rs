@@ -2,6 +2,14 @@ use crate::RawPointerMut;
 
 #[derive(Debug)]
 #[repr(C)]
+/// Managed Resource
+/// 
+/// pointer: The pointer of resource
+/// 
+/// t: Resource type
+/// 
+/// 0: GlobalRef,
+/// 11: Listener
 pub(crate) struct Managed {
     pub(crate) pointer: RawPointerMut,
     t: u8,

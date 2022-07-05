@@ -1,3 +1,22 @@
+use jni::JNIEnv;
+use jni::objects::{GlobalRef, JValue};
+use jni::signature::JavaType;
+use jni::signature::Primitive::Byte;
+use crate::jni_ffi::jni_callback::MIRAI_ENV;
+
+pub unsafe fn single_message_type(env: JNIEnv, single: GlobalRef) -> jni::errors::Result<i8> {
+    let mirai = MIRAI_ENV.get().unwrap();
+
+    let val = env.call_static_method_unchecked(
+        &mirai.message_bridge_class,
+        mirai.single_type,
+        JavaType::Primitive(Byte),
+        &[JValue::Object(single.as_obj())]
+    )?;
+    
+    val.b()
+}
+
 pub mod plain_text {
     use std::mem;
 

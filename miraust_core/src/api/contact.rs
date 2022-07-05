@@ -13,7 +13,7 @@ fn contact_send_message0(contact: &GlobalRef, message: &GlobalRef) -> Option<Glo
     let contact = contact.clone();
     let message = message.clone();
 
-    jni_call_back(|env| {
+    jni_call_back(move |env| {
         unsafe { crate::contact::send_message_unchecked(env, contact, message) }
     })
 }

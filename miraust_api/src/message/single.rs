@@ -16,6 +16,7 @@ pub enum SingleMessage {
     Audio,
     MarketFace,
     MusicShare,
+    Unknown
 }
 
 impl SingleMessage {
@@ -125,6 +126,12 @@ pub mod imp {
 
     pub struct Image {
         pub(crate) inner: Message,
+    }
+
+    impl From<Managed> for Image {
+        fn from(m: Managed) -> Self {
+            Self { inner: m.into() }
+        }
     }
 
     impl Deref for Image {

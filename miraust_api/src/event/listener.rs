@@ -18,11 +18,11 @@ impl Listener {
         where F: Fn(Event) + Send + 'static
     {
         let fun = Box::new(move |e: RawPointerMut, t: u8| {
-            let ma = Managed::new(e, 0);
+            let m = Managed::new(e, 0);
             let event_rs = match t {
                 // 1 => Event::MessageEvent(MessageEvent { inner }),
-                1 => Event::GroupMessageEvent(ma.into()),
-                2 => Event::FriendMessageEvent(ma.into()),
+                1 => Event::GroupMessageEvent(m.into()),
+                2 => Event::FriendMessageEvent(m.into()),
                 _ => Event::Any
             };
 

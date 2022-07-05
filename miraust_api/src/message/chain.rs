@@ -3,6 +3,7 @@ use std::ops::Deref;
 use crate::managed::Managed;
 use crate::message::chain::builder::MessageChainBuilder;
 use crate::message::Message;
+use crate::message::chain::iterator::MessageChainIter;
 
 pub struct MessageChain {
     pub(crate) inner: Message,
@@ -14,7 +15,7 @@ impl MessageChain {
     }
 
     pub fn iter(&self) -> MessageChainIter {
-        MessageChainIter { chain: self }
+        self.into()
     }
 }
 
@@ -35,18 +36,6 @@ impl ToString for MessageChain {
 impl From<Managed> for MessageChain {
     fn from(m: Managed) -> Self {
         Self { inner: m.into() }
-    }
-}
-
-pub struct MessageChainIter<'a> {
-    chain: &'a MessageChain,
-}
-
-impl<'a> Iterator for MessageChainIter<'a> {
-    type Item = &'a MessageChain;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        todo!()
     }
 }
 
@@ -128,3 +117,64 @@ pub mod builder {
         fn message_chain_builder_as_message_chain(chain: RawPointer) -> RawPointerMut;
     }
 }
+
+pub mod iterator {
+    use crate::managed::Managed;
+    use crate::message::chain::MessageChain;
+    use crate::message::single::{SingleMessage};
+    use crate::{RawPointer, RawPointerMut};
+
+    pub struct MessageChainIter<'a> {
+        _chain: &'a MessageChain,
+        iter: Managed
+    }
+
+    impl<'a> From<&'a MessageChain> for MessageChainIter<'a> {
+        fn from(chain: &'a MessageChain) -> Self {
+            let r_iter = unsafe { message_chain_iterator(chain.0.pointer) };
+
+            MessageChainIter {
+                _chain: chain,
+                iter: Managed::new(r_iter, 0)
+            }
+        }
+    }
+
+    impl<'a> Iterator for MessageChainIter<'a> {
+        type Item = SingleMessage;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            if unsafe { message_chain_iterator_has_next(self.iter.pointer) } {
+                let m = Managed::new(unsafe { message_chain_iterator_next(self.iter.pointer) }, 0);
+
+                let single = match unsafe { single_message_type(m.pointer) } {
+                    1 => SingleMessage::PlainText(m.into()),
+                    2 => SingleMessage::At,
+                    3 => SingleMessage::AtAll,
+                    4 => SingleMessage::Image(m.into()),
+                    5 => SingleMessage::RichMessage,
+                    6 => SingleMessage::Face,
+                    7 => SingleMessage::ForwardMessage,
+                    8 => SingleMessage::Audio,
+                    9 => SingleMessage::MarketFace,
+                    10 => SingleMessage::MusicShare,
+                    _ => SingleMessage::Unknown
+                };
+
+                Some(single)
+            } else { None }
+        }
+    }
+
+    #[link(name = "miraust_core")]
+    extern {
+        fn message_chain_iterator(chain: RawPointer) -> RawPointerMut;
+
+        fn message_chain_iterator_has_next(iter: RawPointer) -> bool;
+
+        fn message_chain_iterator_next(iter: RawPointer) -> *mut ();
+
+        fn single_message_type(single: RawPointer) -> i8;
+    }
+}
+

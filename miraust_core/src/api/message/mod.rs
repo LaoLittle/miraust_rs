@@ -32,6 +32,22 @@ fn message_content_to_string0(message: &GlobalRef) -> Option<String> {
 }
 
 mod single {
+    use jni::objects::GlobalRef;
+    use crate::jni_ffi::jni_callback::jni_call_back;
+    
+    #[no_mangle]
+    extern fn single_message_type(single: &GlobalRef) -> i8 {
+        single_message_type0(single).expect("Unknown")
+    }
+
+    fn single_message_type0(single: &GlobalRef) -> Option<i8> {
+        let single = single.clone();
+        
+        jni_call_back(move |env| {
+            unsafe { crate::message::single::single_message_type(env, single).ok() }
+        })
+    }
+    
     mod plain_text {
         use jni::objects::GlobalRef;
 
